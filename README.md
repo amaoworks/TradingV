@@ -36,7 +36,8 @@ Studio **parses the same reports** into structured visualisations.
 - **Causal-chain cards** — the event analyst's output becomes per-event cards:
   `event → direct impact → supply chain → sector sentiment → individual stocks`,
   rendered as a vertical chain with sentiment-tinted borders.
-  <!-- screenshot:causal-chain -->
+
+  ![Causal chain visualisation](assets/screenshots/causal-chain.png)
 - **Bull / Bear as a dialogue** — no more two long blocks of text.
   Left/right chat bubbles split by round, role-tagged, with a live-pulse on
   the freshest turn. Risk debate (aggressive / conservative / neutral) gets
@@ -185,6 +186,9 @@ docker compose run --rm tradingagents
 5. On the **Analysis Progress** page, the right side grows a live debate transcript between Bull and Bear as rounds complete.
 6. On the **Report Detail** page open the `事件影响` tab — per-event cards with arrows showing event → impact → supply chain → sector → individual stocks (instead of a wall of Markdown).
 7. Add the ticker to **持仓追踪** with shares + cost. The Holdings page shows real-time price, P&L, and links to the latest analysis signal.
+8. From **模拟交易** open the K-line drawer for any held ticker — daily + 1/5/15/30/60-min bars with MA(5/10/20), volume, and entry/target/stop overlays from the decision card.
+
+![Paper trading with K-line panel](assets/screenshots/paper-trading-kline.png)
 
 ---
 
