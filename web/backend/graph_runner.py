@@ -311,13 +311,24 @@ def _extract_signal_direction(signal: str) -> str:
 
 def build_config(req) -> dict:
     """Build a config dict from an AnalyzeRequest, merging with defaults."""
-    config = DEFAULT_CONFIG.copy()
+    try:
+        from .routers.settings import get_effective_config, get_provider_base_url
+        config = get_effective_config()
+    except Exception:
+        get_provider_base_url = None
+        config = DEFAULT_CONFIG.copy()
     if req.llm_provider:
         config["llm_provider"] = req.llm_provider
     if req.deep_think_llm:
         config["deep_think_llm"] = req.deep_think_llm
     if req.quick_think_llm:
         config["quick_think_llm"] = req.quick_think_llm
+    if getattr(req, "backend_url", None):
+        config["backend_url"] = req.backend_url
+    elif get_provider_base_url:
+        provider_url = get_provider_base_url(config["llm_provider"])
+        if provider_url:
+            config["backend_url"] = provider_url
     # Default to Chinese output unless user explicitly picks another language
     config["output_language"] = req.output_language or "Chinese"
     config["max_debate_rounds"] = req.max_debate_rounds

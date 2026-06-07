@@ -20,6 +20,7 @@ class SettingsUpdate(BaseModel):
     llm_provider: Optional[str] = None
     deep_think_llm: Optional[str] = None
     quick_think_llm: Optional[str] = None
+    backend_url: Optional[str] = None
     max_debate_rounds: Optional[int] = None
     max_risk_discuss_rounds: Optional[int] = None
     output_language: Optional[str] = None
@@ -35,6 +36,12 @@ class APIKeysUpdate(BaseModel):
     ``tradingagents.llm_clients.api_key_env.PROVIDER_API_KEY_ENV``.
     """
     keys: dict[str, str]
+
+
+class ProviderConnectionUpdate(BaseModel):
+    provider: str
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
 
 
 class NLQueryRequest(BaseModel):

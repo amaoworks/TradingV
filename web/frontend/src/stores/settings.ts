@@ -6,6 +6,7 @@ export interface Settings {
   llm_provider: string
   deep_think_llm: string
   quick_think_llm: string
+  backend_url: string | null
   max_debate_rounds: number
   max_risk_discuss_rounds: number
   output_language: string
@@ -25,9 +26,30 @@ export interface ModelOption {
  *  providers without a static catalog (openrouter, azure). */
 export type ModelCatalog = Record<string, { quick: ModelOption[]; deep: ModelOption[] }>
 
+export interface ProviderConnection {
+  provider: string
+  label: string
+  env_var: string | null
+  base_url: string
+  default_base_url: string
+  masked: string
+  set: boolean
+  required: boolean
+}
+
+export interface ProviderOption {
+  provider: string
+  label: string
+  env_var: string | null
+  required: boolean
+  default_base_url: string
+}
+
 export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<Settings | null>(null)
   const modelCatalog = ref<ModelCatalog>({})
+  const providerConnections = ref<ProviderConnection[]>([])
+  const providerChoices = ref<ProviderOption[]>([])
   let catalogPromise: Promise<void> | null = null
 
   async function fetch() {
@@ -40,6 +62,12 @@ export const useSettingsStore = defineStore('settings', () => {
     await fetch()
   }
 
+  async function fetchProviderConnections() {
+    const { data } = await api.get('/api/provider-connections')
+    providerConnections.value = data.providers || []
+    providerChoices.value = data.available || []
+  }
+
   /** Lazy-load the per-provider model catalog. Cached for the page session
    *  — the catalog only changes when the server upgrades. */
   function fetchModelCatalog(): Promise<void> {
@@ -50,5 +78,14 @@ export const useSettingsStore = defineStore('settings', () => {
     return catalogPromise
   }
 
-  return { settings, modelCatalog, fetch, update, fetchModelCatalog }
+  return {
+    settings,
+    modelCatalog,
+    providerConnections,
+    providerChoices,
+    fetch,
+    update,
+    fetchModelCatalog,
+    fetchProviderConnections,
+  }
 })

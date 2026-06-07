@@ -1,4 +1,4 @@
-# TradingAgents-Studio
+# TradingV
 
 > **可视化多智能体 LLM 交易研究平台 — 看见 Agent 怎么想、怎么辩、怎么决策,而不是只看最后一个 BUY/SELL。**
 >
@@ -85,7 +85,7 @@ decision log, checkpoint resume — still works as before.
 
 ## 🆚 Why this fork?
 
-| | Upstream `TradingAgents` | **TradingAgents-Studio** |
+| | Upstream `TradingAgents` | **TradingV** |
 |---|---|---|
 | **Interface** | CLI only | CLI + Web UI |
 | **Market coverage** | US | US + **A-share native** + HK |
@@ -108,8 +108,8 @@ decision log, checkpoint resume — still works as before.
 ### 1. Install
 
 ```bash
-git clone <your-repo-url> TradingAgents-Studio
-cd TradingAgents-Studio
+git clone <your-repo-url> TradingV
+cd TradingV
 
 # Recommended: virtual env
 python -m venv .venv
@@ -141,13 +141,12 @@ values are written through to `.env` so the CLI sees the same keys.
 **Web Studio (recommended):**
 
 ```bash
-# Terminal 1 — backend (http://127.0.0.1:8000)
-tradingagents-web
+# Start both backend and frontend (prefers uv for Python env)
+scripts/start.sh all
 
-# Terminal 2 — frontend (http://localhost:3000)
-cd web/frontend
-npm install
-npm run dev
+# Or start them separately
+scripts/start.sh backend   # http://127.0.0.1:8000
+scripts/start.sh frontend  # http://localhost:3000
 ```
 
 For production single-process deployment, build the frontend once and let
@@ -525,7 +524,7 @@ Changes from upstream are documented in [`CHANGELOG.md`](CHANGELOG.md).
 
 ### English
 
-TradingAgents-Studio is intended for **research, education, and personal
+TradingV is intended for **research, education, and personal
 experimentation only**. It is **NOT** financial, investment, or trading advice.
 
 - The project does **not recommend any stock or security**. The outputs of
@@ -543,7 +542,7 @@ experimentation only**. It is **NOT** financial, investment, or trading advice.
 
 ### 中文
 
-TradingAgents-Studio 仅供 **研究、教育、个人学习与技术演示** 使用,
+TradingV 仅供 **研究、教育、个人学习与技术演示** 使用,
 **不构成任何形式的投资、财务或交易建议**。
 
 - 本项目 **不推荐任何股票或证券**。Agent 输出的"买入 / 卖出 / 持有"信号、目标价、

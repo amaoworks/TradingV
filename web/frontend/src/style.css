@@ -1,7 +1,428 @@
-body {
+:root {
+  color-scheme: light;
+  --kumo-base: #ffffff;
+  --kumo-canvas: #f7f6f2;
+  --kumo-overlay: rgba(255, 255, 255, 0.92);
+  --kumo-control: #f3f1ea;
+  --kumo-tint: #eeece4;
+  --kumo-line: #e7e5de;
+  --kumo-hairline: rgba(24, 24, 27, 0.1);
+  --kumo-strong: #171717;
+  --kumo-default: #3f3f46;
+  --kumo-subtle: #71717a;
+  --kumo-inactive: #a1a1aa;
+  --kumo-brand: #f05365;
+  --kumo-brand-hover: #ff6b7c;
+  --kumo-success: #12a150;
+  --kumo-warning: #b7791f;
+  --kumo-danger: #e5484d;
+  --kumo-info: #276ef1;
+  --kumo-shadow: 0 1px 2px rgba(24, 24, 27, 0.05), 0 12px 32px rgba(24, 24, 27, 0.04);
+  --kumo-button-shadow: 0 1px 1px rgba(24, 24, 27, 0.06), 0 4px 10px rgba(24, 24, 27, 0.04);
+  --kumo-button-shadow-hover: 0 1px 1px rgba(24, 24, 27, 0.08), 0 6px 14px rgba(24, 24, 27, 0.06);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --kumo-base: #121211;
+  --kumo-canvas: #080807;
+  --kumo-overlay: rgba(18, 18, 17, 0.9);
+  --kumo-control: #1d1c1a;
+  --kumo-tint: #25231f;
+  --kumo-line: rgba(255, 255, 255, 0.12);
+  --kumo-hairline: rgba(255, 255, 255, 0.1);
+  --kumo-strong: #f5f5f3;
+  --kumo-default: #d6d3cc;
+  --kumo-subtle: #a8a29e;
+  --kumo-inactive: #78716c;
+  --kumo-brand: #ff6b7c;
+  --kumo-brand-hover: #ff8391;
+  --kumo-success: #3dcc72;
+  --kumo-warning: #f0b84d;
+  --kumo-danger: #ff6b6f;
+  --kumo-info: #70a0ff;
+  --kumo-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 18px 38px rgba(0, 0, 0, 0.22);
+  --kumo-button-shadow: 0 1px 1px rgba(0, 0, 0, 0.24), 0 5px 14px rgba(0, 0, 0, 0.2);
+  --kumo-button-shadow-hover: 0 1px 1px rgba(0, 0, 0, 0.28), 0 7px 18px rgba(0, 0, 0, 0.26);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
   margin: 0;
 }
 
-#app {
+body {
+  overflow: hidden;
+  background: var(--kumo-canvas);
+  color: var(--kumo-default);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-shell {
   height: 100vh;
+  background: transparent;
+}
+
+.app-sidebar {
+  height: 100vh;
+  border-right: 1px solid var(--kumo-line);
+  background: color-mix(in srgb, var(--kumo-base) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.app-sidebar .n-layout-sider-scroll-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 70px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--kumo-line);
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: transparent;
+  text-align: left;
+  cursor: default;
+}
+
+.brand.is-collapsed {
+  justify-content: center;
+  padding-inline: 12px;
+  cursor: pointer;
+}
+
+.brand.is-collapsed:hover .brand-mark {
+  border-color: color-mix(in srgb, var(--kumo-brand) 40%, var(--kumo-line));
+  box-shadow: var(--kumo-button-shadow-hover);
+}
+
+.brand:focus-visible {
+  outline: 2px solid var(--kumo-brand);
+  outline-offset: -2px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--kumo-line);
+  border-radius: 8px;
+  background: var(--kumo-control);
+  box-shadow: var(--kumo-shadow);
+}
+
+.brand-mark img {
+  display: block;
+  width: 25px;
+  height: 25px;
+}
+
+.brand-copy {
+  min-width: 0;
+}
+
+.brand-name {
+  overflow: hidden;
+  color: var(--kumo-strong);
+  font-size: 15px;
+  font-weight: 720;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-subtitle {
+  margin-top: 3px;
+  color: var(--kumo-subtle);
+  font-size: 12px;
+  font-weight: 520;
+  white-space: nowrap;
+}
+
+.sidebar-section {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 10px 80px;
+  overflow-y: auto;
+}
+
+.sidebar-section.is-collapsed {
+  padding-bottom: 190px;
+}
+
+.sidebar-label {
+  padding: 0 12px 8px;
+  color: var(--kumo-inactive);
+  font-size: 11px;
+  font-weight: 680;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.sidebar-footer {
+  position: absolute;
+  right: 10px;
+  bottom: 14px;
+  left: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--kumo-line);
+  border-radius: 8px;
+  background: var(--kumo-overlay);
+  box-shadow: var(--kumo-shadow);
+}
+
+.sidebar-footer.is-collapsed {
+  right: 8px;
+  left: 8px;
+  flex-direction: column;
+  align-items: center;
+  padding: 7px;
+}
+
+.app-main {
+  min-width: 0;
+  height: 100vh;
+  background: transparent;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--kumo-line);
+  background: var(--kumo-overlay);
+  backdrop-filter: blur(18px);
+}
+
+.topbar-left,
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.topbar-copy {
+  min-width: 0;
+}
+
+.topbar-kicker {
+  color: var(--kumo-inactive);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.topbar-title {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--kumo-strong);
+  font-size: 16px;
+  font-weight: 720;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+.app-content {
+  height: calc(100vh - 70px);
+  overflow: auto;
+}
+
+.content-frame {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.n-page-header {
+  padding-bottom: 6px;
+}
+
+.n-page-header .n-page-header__title {
+  color: var(--kumo-strong);
+  font-size: 24px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.n-page-header .n-page-header__subtitle {
+  color: var(--kumo-subtle);
+  font-size: 13px;
+}
+
+.n-card {
+  border-color: var(--kumo-line);
+  background: var(--kumo-base);
+  box-shadow: var(--kumo-shadow);
+}
+
+.n-card .n-card-header {
+  border-bottom: 1px solid var(--kumo-line);
+}
+
+.n-card.n-card--embedded {
+  background: var(--kumo-control);
+  box-shadow: none;
+}
+
+.n-data-table {
+  border-radius: 8px;
+  box-shadow: var(--kumo-shadow);
+}
+
+.n-data-table .n-data-table-th {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.n-tag {
+  border-radius: 999px;
+  font-weight: 620;
+}
+
+.n-button:not(.n-button--quaternary-type, .n-button--text-type) {
+  box-shadow: var(--kumo-button-shadow);
+}
+
+.n-button:not(.n-button--quaternary-type, .n-button--text-type):hover {
+  box-shadow: var(--kumo-button-shadow-hover);
+}
+
+.n-button--primary-type {
+  box-shadow: var(--kumo-button-shadow);
+}
+
+.sidebar-footer .n-button,
+.brand-mark {
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.sidebar-footer .n-button {
+  background: var(--kumo-control);
+  color: var(--kumo-subtle);
+  box-shadow: var(--kumo-button-shadow);
+}
+
+.sidebar-footer .n-button:hover,
+.sidebar-footer .n-button:focus-visible {
+  background: var(--kumo-tint);
+  color: var(--kumo-strong);
+  box-shadow: var(--kumo-button-shadow-hover);
+}
+
+.sidebar-footer .locale-toggle {
+  width: 36px;
+  height: 34px;
+  min-width: 36px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: 0;
+}
+
+.n-input,
+.n-base-selection,
+.n-input-number {
+  --n-border: 1px solid var(--kumo-line) !important;
+  --n-border-hover: 1px solid var(--kumo-hairline) !important;
+  --n-border-focus: 1px solid var(--kumo-brand) !important;
+  --n-box-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--kumo-brand) 18%, transparent) !important;
+}
+
+.command-button {
+  border: 1px solid var(--kumo-line);
+  background: var(--kumo-base);
+  box-shadow: var(--kumo-button-shadow);
+}
+
+.command-button:hover {
+  box-shadow: var(--kumo-button-shadow-hover);
+}
+
+.markdown-body {
+  color: var(--kumo-default);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  color: var(--kumo-strong);
+  letter-spacing: 0;
+}
+
+.markdown-body code,
+.markdown-body pre {
+  border: 1px solid var(--kumo-line);
+  border-radius: 8px;
+  background: var(--kumo-control);
+}
+
+@media (max-width: 860px) {
+  .app-sidebar {
+    position: absolute;
+    z-index: 20;
+  }
+
+  .topbar {
+    height: 64px;
+    padding: 0 14px;
+  }
+
+  .topbar-actions .command-button {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: inline-flex;
+  }
+
+  .app-content {
+    height: calc(100vh - 64px);
+  }
+
+  .content-frame {
+    padding: 16px;
+  }
+
+  .n-page-header .n-page-header__title {
+    font-size: 21px;
+  }
 }

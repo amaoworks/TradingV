@@ -50,7 +50,7 @@ async def lifespan(app):
     await scheduler_service.stop()
 
 
-app = FastAPI(title="TradingAgents Web", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="TradingV Web", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -265,6 +265,7 @@ const quickModelOptions = computed(() => {
 
 onMounted(() => {
   settingsStore.fetchModelCatalog()
+  settingsStore.fetchProviderConnections()
   // Pre-fill from query params (typically from the Holdings "Analyze" button).
   const qTicker = route.query.ticker
   const qAsset = route.query.asset_type
@@ -315,19 +316,9 @@ watch(
   },
 )
 
-const providerOptions = [
-  { label: 'DeepSeek', value: 'deepseek' },
-  { label: 'OpenAI', value: 'openai' },
-  { label: 'Anthropic', value: 'anthropic' },
-  { label: 'Google', value: 'google' },
-  { label: 'xAI', value: 'xai' },
-  { label: 'Qwen', value: 'qwen' },
-  { label: 'GLM', value: 'glm' },
-  { label: 'MiniMax', value: 'minimax' },
-  { label: 'OpenRouter', value: 'openrouter' },
-  { label: 'Ollama', value: 'ollama' },
-  { label: 'Azure', value: 'azure' },
-]
+const providerOptions = computed(() =>
+  settingsStore.providerConnections.map(row => ({ label: row.label, value: row.provider })),
+)
 
 const langOptions = [
   { label: '中文', value: 'Chinese' },
