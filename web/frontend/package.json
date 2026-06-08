@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "build:kumo": "tsc -p tsconfig.kumo.json && VITE_KUMO_APP=1 vite build",
+    "build": "tsc -p tsconfig.kumo.json && vite build",
+    "build:kumo": "npm run build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,30 +14,18 @@
     "@phosphor-icons/react": "^2.1.10",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vicons/ionicons5": "^0.13.0",
     "@vitejs/plugin-react": "^6.0.2",
     "axios": "^1.16.1",
-    "chart.js": "^4.5.1",
-    "echarts": "^6.1.0",
     "klinecharts": "^9.8.10",
     "marked": "^18.0.4",
-    "naive-ui": "^2.44.1",
-    "pinia": "^3.0.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",
-    "vue": "^3.5.34",
-    "vue-chartjs": "^5.3.3",
-    "vue-i18n": "^9.14.4",
-    "vue-router": "^4.6.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^24.12.3",
-    "@vitejs/plugin-vue": "^6.0.6",
-    "@vue/tsconfig": "^0.9.1",
     "typescript": "~6.0.2",
-    "vite": "^8.0.12",
-    "vue-tsc": "^3.2.8"
+    "vite": "^8.0.12"
   }
 }

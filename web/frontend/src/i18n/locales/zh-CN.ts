@@ -537,6 +537,8 @@ export default {
       name: '名称',
       namePlaceholder: '可选,默认按日期范围生成',
       dateRange: '时间范围',
+      startDate: '开始日期',
+      endDate: '结束日期',
       source: '信号源',
       universe: '标的筛选',
       universePlaceholder: '留空 = 决策日志里出现的全部标的',
@@ -635,6 +637,7 @@ export default {
   },
 
   report: {
+    title: '报告',
     titlePrefix: '报告: {ticker}',
     exportMd: '导出 Markdown',
     paperOrderBtn: '按此决策模拟下单',

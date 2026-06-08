@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Frontend](https://img.shields.io/badge/Frontend-Vue_3_%2B_Vite-42b883.svg)](https://vuejs.org/)
+[![Frontend](https://img.shields.io/badge/Frontend-React_%2B_Kumo_%2B_Vite-f48120.svg)](https://kumo-ui.com/)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
 **English** | [简体中文](README.zh-CN.md)
@@ -149,6 +149,15 @@ scripts/start.sh backend   # http://127.0.0.1:8000
 scripts/start.sh frontend  # http://localhost:3000
 ```
 
+The active frontend is React + Kumo.
+
+Current Kumo route parity:
+
+- Implemented: `/`, `/analyze`, `/screener`, `/progress/:id`, `/holdings`,
+  `/schedule`, `/paper`, `/backtest`, `/quality`, `/history`, `/report/:id`,
+  `/settings`.
+- Legacy Vue/Naive/Pinia/Vue Router sources and dependencies have been removed.
+
 For production single-process deployment, build the frontend once and let
 the backend serve the static bundle:
 
@@ -183,7 +192,9 @@ docker compose run --rm tradingagents
 3. **新建分析** → type `研究茅台短期` in the smart-parse box → click 解析并填充 → ticker `600519`, date today, all set.
 4. Pick analyst team — check `Event` for the causal-chain output and `CN Sentiment` for 股吧 — start.
 5. On the **Analysis Progress** page, the right side grows a live debate transcript between Bull and Bear as rounds complete.
-6. On the **Report Detail** page open the `事件影响` tab — per-event cards with arrows showing event → impact → supply chain → sector → individual stocks (instead of a wall of Markdown).
+6. Open the completed run from **History** and inspect the **Event impact** tab:
+   per-event cards show event → impact → supply chain → sector → individual
+   stocks instead of a wall of Markdown.
 7. Add the ticker to **持仓追踪** with shares + cost. The Holdings page shows real-time price, P&L, and links to the latest analysis signal.
 8. From **模拟交易** open the K-line drawer for any held ticker — daily + 1/5/15/30/60-min bars with MA(5/10/20), volume, and entry/target/stop overlays from the decision card.
 
@@ -232,7 +243,7 @@ A single complete analysis (4 analysts + 1 debate round, ~5–10K input tokens
                                           │
                  ┌────────────────────────────────────────────────────────┐
                  │   Web Studio                                            │
-                 │   FastAPI ◄─► SQLite  │  Vue 3 + Naive UI frontend     │
+                 │   FastAPI ◄─► SQLite  │  React + Kumo frontend         │
                  │                                                        │
                  │   ▸ Natural-language analyze entry                     │
                  │   ▸ Causal-chain + debate-bubble visualisation         │
@@ -342,7 +353,7 @@ gives you a clean slate. API keys live in `.env`, not in this database.
 
 **Web backend:** FastAPI + Uvicorn · WebSockets · SQLite
 
-**Web frontend:** Vue 3 + TypeScript + Vite · Naive UI · Pinia · Vue Router · Chart.js + vue-chartjs · klinecharts · marked · axios
+**Web frontend:** React + TypeScript + Vite · Kumo UI (`@cloudflare/kumo`, registry: `https://kumo-ui.com/api/component-registry`) · React Router · klinecharts · marked · axios
 
 **LLM providers:** OpenAI · Google Gemini · Anthropic Claude · xAI Grok · DeepSeek · Qwen (DashScope intl + CN) · GLM (Z.AI + BigModel) · MiniMax (global + CN) · OpenRouter · Ollama · Azure OpenAI
 
@@ -441,18 +452,18 @@ web/                            # Web Studio
 │       ├── quote.py            # Studio — K-line OHLC (daily + intraday)
 │       ├── backtest.py         # Studio — backtest runs / curve / trades
 │       └── settings.py         # incl. /api/api-keys + /api/model-catalog
-└── frontend/                   # Vue 3 + Naive UI + Pinia + Vite
+└── frontend/                   # React + Kumo + Vite
     └── src/
-        ├── components/
-        │   ├── EventReport.vue       # causal-chain visualisation
-        │   ├── CausalChain.vue
-        │   ├── DebateThread.vue      # bull/bear bubble dialogue
-        │   ├── ModelPicker.vue       # per-provider model dropdown
-        │   └── KLineChart.vue        # Studio — klinecharts panel
-        └── pages/                    # Dashboard · NewAnalysis · Holdings ·
-                                       # Schedule · Paper · Backtest ·
-                                       # AnalysisProgress · History ·
-                                       # ReportDetail · Settings
+        ├── react/                    # active Kumo app
+        │   ├── components/
+        │   ├── pages/                # Dashboard · Analyze · Progress ·
+        │   │                         # Screener · Holdings · Schedule ·
+        │   │                         # Paper · Backtest · Quality ·
+        │   │                         # History · ReportDetail · Settings
+        │   └── lib/
+        ├── i18n/locales/             # shared locale dictionaries
+        ├── main.kumo.tsx
+        └── api.ts
 
 cli/                            # Typer-based CLI (inherited)
 examples/                       # Minimal Python entry-point examples

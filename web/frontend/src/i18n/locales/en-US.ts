@@ -537,6 +537,8 @@ export default {
       name: 'Name',
       namePlaceholder: 'Optional; auto-generated from date range',
       dateRange: 'Date range',
+      startDate: 'Start date',
+      endDate: 'End date',
       source: 'Signal source',
       universe: 'Universe filter',
       universePlaceholder: 'Leave empty = all tickers found in the decision log',
@@ -635,6 +637,7 @@ export default {
   },
 
   report: {
+    title: 'Report',
     titlePrefix: 'Report: {ticker}',
     exportMd: 'Export Markdown',
     paperOrderBtn: 'Paper-order from this',

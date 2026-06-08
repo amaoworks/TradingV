@@ -9,23 +9,63 @@ Kumo is a React component system. The migration is therefore a frontend rewrite 
 ## Current Baseline
 
 - Baseline commit before migration: `06d148a Improve dev startup and sidebar shell`
-- Current frontend stack:
-  - Vue 3
+- Active frontend stack:
+  - React
+  - ReactDOM
+  - React Router
   - Vite
   - TypeScript
-  - Naive UI
-  - Pinia
-  - Vue Router
+  - Kumo UI
   - Axios
-  - Chart.js / vue-chartjs
   - klinecharts
+  - marked
+- Legacy Vue/Naive/Pinia/Vue Router sources and dependencies have been removed.
 - Backend integration entrypoint:
   - `web/frontend/src/api.ts`
   - Vite dev proxy for `/api` and `/ws`
 - Kumo reference:
-  - `@cloudflare/kumo` v2.5.0 from official docs page metadata
+  - Official component registry: `https://kumo-ui.com/api/component-registry`
+  - `@cloudflare/kumo` v2.5.0 from the installed package metadata
   - React/ReactDOM-based component imports
   - Standalone CSS supported for non-Tailwind projects
+
+## Current Migration Status
+
+- Default Vite entrypoint now mounts `src/main.kumo.tsx`.
+- Default production build is `npm run build`, which runs `tsc -p tsconfig.kumo.json && vite build`.
+- Legacy Vue build script has been removed.
+- Kumo pages implemented and wired:
+  - `/`
+  - `/analyze`
+  - `/screener`
+  - `/progress/:id`
+  - `/holdings`
+  - `/schedule`
+  - `/paper`
+  - `/backtest`
+  - `/quality`
+  - `/history`
+  - `/report/:id`
+  - `/settings`
+- All required user-facing routes now have React/Kumo parity pages.
+- Active Kumo imports are from `@cloudflare/kumo`; no new Naive UI usage is being added to the React app.
+
+## Route Parity Tracker
+
+| Route | Status | Required parity scope |
+| --- | --- | --- |
+| `/` | Implemented | Dashboard metrics, recent runs, portfolio/watchlist panels |
+| `/analyze` | Implemented | Natural-language parse, form submission, analyst/model controls |
+| `/screener` | Implemented | Screener form, results table, progress stream controls |
+| `/progress/:id` | Implemented | WebSocket status, timeline, debate turns, report navigation |
+| `/holdings` | Implemented | CRUD, CSV import, quote refresh, latest signal, K-line access |
+| `/schedule` | Implemented | CRUD, trigger, bulk-from-holdings, enable/disable state |
+| `/paper` | Implemented | Account state, orders, positions, NAV, K-line drawer |
+| `/backtest` | Implemented | Run list, create dialog, source/universe options, detail metrics, NAV curve, trades, delete |
+| `/quality` | Implemented | Decision-quality dashboard, scoring controls, calibration, breakdowns, heatmap, decisions |
+| `/history` | Implemented | Run list, filters, pagination, route navigation |
+| `/settings` | Implemented | API keys, provider/model metadata, app preferences |
+| `/report/:id` | Implemented | Report detail, causal chain, event cards, debate sections, markdown output, paper-order |
 
 ## Non-Negotiable Requirements
 
@@ -128,10 +168,10 @@ Acceptance:
 
 ### Stage 5: Cleanup
 
-- Remove Vue, Naive UI, Pinia, Vue Router, and Vue compiler dependencies.
-- Remove `.vue` source files after React equivalents are verified.
-- Remove obsolete CSS overrides for Naive internals.
-- Update frontend README and developer scripts.
+- Remove Vue, Naive UI, Pinia, Vue Router, and Vue compiler dependencies. Done.
+- Remove `.vue` source files after React equivalents are verified. Done.
+- Remove obsolete CSS overrides for Naive internals. Done.
+- Update frontend README and developer scripts. Done.
 
 Acceptance:
 - `rg "vue|naive-ui|pinia|vue-router|\\.vue" web/frontend/src web/frontend/package.json` shows no active app dependency.
@@ -151,6 +191,21 @@ Acceptance:
 | i18n | `zh-CN` and `en-US` switch without missing core navigation labels |
 | Removal | Vue/Naive dependencies removed only after page parity |
 
+## Latest Verification
+
+Checked on 2026-06-08:
+
+- `npm run build` succeeds for `web/frontend`.
+- `src/react/App.tsx` wires all public routes listed in the route parity tracker.
+- Active package dependencies contain React, Kumo, React Router, Vite,
+  klinecharts, marked, axios, and zod; no Vue, Naive UI, Pinia, or Vue Router
+  dependency remains.
+- Legacy `.vue` source files, Vue entrypoints, Vue router/store files,
+  `index.kumo.html`, and `tsconfig.app.json` have been removed.
+- Documentation now describes React + Kumo as the active frontend stack.
+- The only build caveat observed is Vite's large chunk size warning; it does
+  not block the production build.
+
 ## Risks
 
 - Kumo is React-based, so this is a framework migration rather than a styling patch.
@@ -158,10 +213,14 @@ Acceptance:
 - Some Naive UI widgets may not have one-to-one Kumo replacements; these must be rebuilt with Kumo primitives and local React components.
 - The final migration should avoid keeping a mixed Vue/React production runtime because that would preserve the old framework and fail the objective.
 
+## Documentation Requirements
+
+- Keep `README.md`, `README.zh-CN.md`, `web/frontend/README.md`, and this plan aligned with the active Kumo route state.
+- Public README workflow steps must not promise a Kumo page that is still a placeholder.
+- When a route is migrated, update the route parity tracker before or in the same change as the implementation.
+- Do not document Vue, Naive UI, Pinia, or Vue Router as active frontend dependencies.
+
 ## Immediate Next Steps
 
-1. Install React/Kumo dependencies.
-2. Create React app entry and Kumo shell.
-3. Port shared API client and route skeleton.
-4. Migrate Dashboard as the first parity page.
-5. Verify build and route rendering before expanding to more pages.
+1. Run any additional manual workflow checks against live backend data as needed.
+2. Consider code-splitting large route bundles if bundle size becomes a production concern.

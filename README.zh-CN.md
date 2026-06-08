@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Frontend](https://img.shields.io/badge/Frontend-Vue_3_%2B_Vite-42b883.svg)](https://vuejs.org/)
+[![Frontend](https://img.shields.io/badge/Frontend-React_%2B_Kumo_%2B_Vite-f48120.svg)](https://kumo-ui.com/)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
 [English](README.md) | **简体中文**
@@ -145,6 +145,15 @@ scripts/start.sh backend   # http://127.0.0.1:8000
 scripts/start.sh frontend  # http://localhost:3000
 ```
 
+当前生效的前端是 React + Kumo。
+
+当前 Kumo 路由对齐状态:
+
+- 已实现:`/`、`/analyze`、`/screener`、`/progress/:id`、`/holdings`、
+  `/schedule`、`/paper`、`/backtest`、`/quality`、`/history`、`/report/:id`、
+  `/settings`。
+- 旧 Vue/Naive/Pinia/Vue Router 源码与依赖已移除。
+
 生产环境单进程部署:前端构建一次,让后端直接托管静态产物:
 
 ```bash
@@ -178,7 +187,8 @@ docker compose run --rm tradingagents
 3. **新建分析** → 在智能解析框里输入 `研究茅台短期` → 点击「解析并填充」 → 代码 `600519`、日期今天,全部自动填好。
 4. 选择分析师团队 —— 勾上 `Event` 看因果链输出,勾上 `CN Sentiment` 看股吧情绪 → 开始。
 5. **分析进度页**右侧会随着每一轮的完成,实时生长出 Bull 和 Bear 之间的辩论记录。
-6. **报告详情页**打开「事件影响」Tab —— 一张张事件卡片,带箭头展示 事件 → 影响 → 供应链 → 板块 → 个股(而不是一堵 Markdown 墙)。
+6. 从**历史记录**打开已完成任务,在**报告详情页**查看「事件影响」Tab ——
+   一张张事件卡片展示 事件 → 影响 → 供应链 → 板块 → 个股,不再是一堵 Markdown 墙。
 7. 在**持仓追踪**里把该标的加入,填上股数和成本。持仓页会显示实时价格、盈亏,以及链回最新一次分析信号的入口。
 8. 在**模拟交易**页对任意持仓打开 K 线抽屉 —— 日线 + 1/5/15/30/60 分钟线,带 MA(5/10/20)、成交量副图,以及从决策卡同步过来的入场/目标/止损参考线。
 
@@ -226,7 +236,7 @@ docker compose run --rm tradingagents
                                           │
                  ┌────────────────────────────────────────────────────────┐
                  │   Web Studio                                            │
-                 │   FastAPI ◄─► SQLite  │  Vue 3 + Naive UI frontend     │
+                 │   FastAPI ◄─► SQLite  │  React + Kumo frontend         │
                  │                                                        │
                  │   ▸ 自然语言分析入口                                    │
                  │   ▸ 因果链 + 辩论气泡可视化                             │
@@ -335,7 +345,7 @@ API Key 存在 `.env`,**不**存在这个数据库里。
 
 **Web 后端:** FastAPI + Uvicorn · WebSockets · SQLite
 
-**Web 前端:** Vue 3 + TypeScript + Vite · Naive UI · Pinia · Vue Router · Chart.js + vue-chartjs · klinecharts · marked · axios
+**Web 前端:** React + TypeScript + Vite · Kumo UI(`@cloudflare/kumo`, registry: `https://kumo-ui.com/api/component-registry`) · React Router · klinecharts · marked · axios
 
 **LLM Provider:** OpenAI · Google Gemini · Anthropic Claude · xAI Grok · DeepSeek · Qwen(DashScope 国际版 + 国内版) · GLM(Z.AI + BigModel) · MiniMax(全球 + 国内) · OpenRouter · Ollama · Azure OpenAI
 
@@ -433,18 +443,18 @@ web/                            # Web Studio
 │       ├── quote.py            # Studio — K 线 OHLC(日线 + 分钟线)
 │       ├── backtest.py         # Studio — 回测运行 / 曲线 / 成交
 │       └── settings.py         # 含 /api/api-keys + /api/model-catalog
-└── frontend/                   # Vue 3 + Naive UI + Pinia + Vite
+└── frontend/                   # React + Kumo + Vite
     └── src/
-        ├── components/
-        │   ├── EventReport.vue       # 因果链可视化
-        │   ├── CausalChain.vue
-        │   ├── DebateThread.vue      # 多空气泡对话
-        │   ├── ModelPicker.vue       # 按 provider 的模型下拉框
-        │   └── KLineChart.vue        # Studio — klinecharts 面板
-        └── pages/                    # Dashboard · NewAnalysis · Holdings ·
-                                       # Schedule · Paper · Backtest ·
-                                       # AnalysisProgress · History ·
-                                       # ReportDetail · Settings
+        ├── react/                    # 当前生效的 Kumo 应用
+        │   ├── components/
+        │   ├── pages/                # Dashboard · Analyze · Progress ·
+        │   │                         # Screener · Holdings · Schedule ·
+        │   │                         # Paper · Backtest · Quality ·
+        │   │                         # History · ReportDetail · Settings
+        │   └── lib/
+        ├── i18n/locales/             # 共享文案字典
+        ├── main.kumo.tsx
+        └── api.ts
 
 cli/                            # 基于 Typer 的 CLI(继承自上游)
 examples/                       # 最小可运行 Python 入口示例
