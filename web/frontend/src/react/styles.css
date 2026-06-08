@@ -1,0 +1,246 @@
+@import '@cloudflare/kumo/styles/standalone';
+
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--kumo-color-canvas, #f8fafc);
+}
+
+.kumo-app {
+  display: flex;
+  min-height: 100vh;
+  background: var(--kumo-color-canvas, #f8fafc);
+  color: var(--kumo-color-default, #374151);
+}
+
+.kumo-sidebar {
+  border-right: 1px solid var(--kumo-color-hairline, #e1e7ef);
+}
+
+.kumo-brand,
+.kumo-link-reset {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kumo-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+}
+
+.kumo-brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--kumo-color-line, #e1e7ef);
+  border-radius: 8px;
+  background: var(--kumo-color-control, #f4f6f8);
+  color: var(--kumo-color-brand, #f48120);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.kumo-brand strong,
+.kumo-brand small {
+  display: block;
+  line-height: 1.15;
+}
+
+.kumo-brand small {
+  margin-top: 3px;
+  color: var(--kumo-color-subtle, #6b7280);
+  font-size: 11px;
+}
+
+.kumo-sidebar-tools {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+}
+
+.kumo-shell-button {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kumo-color-subtle, #6b7280);
+  cursor: pointer;
+}
+
+.kumo-shell-button:hover,
+.kumo-shell-button:focus-visible {
+  background: var(--kumo-color-tint, #eef2f6);
+  color: var(--kumo-color-default, #374151);
+  outline: none;
+}
+
+.kumo-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.kumo-topbar {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  background: var(--kumo-color-canvas, #fff);
+  padding: 0 24px;
+}
+
+.kumo-topbar-title {
+  min-width: 0;
+}
+
+.kumo-topbar-title p,
+.kumo-eyebrow {
+  margin: 0;
+  color: var(--kumo-color-subtle, #6b7280);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kumo-topbar-title h1,
+.kumo-page-header h1 {
+  margin: 3px 0 0;
+  color: var(--kumo-color-default, #111827);
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.kumo-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kumo-content {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.kumo-page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kumo-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kumo-page-header p {
+  margin: 6px 0 0;
+  color: var(--kumo-color-subtle, #6b7280);
+}
+
+.kumo-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.kumo-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  padding: 16px 18px;
+}
+
+.kumo-card-header h2,
+.kumo-placeholder h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.kumo-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px;
+}
+
+.kumo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.kumo-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  color: inherit;
+  padding: 14px 18px;
+  text-decoration: none;
+}
+
+.kumo-list-item:hover {
+  background: var(--kumo-color-tint, #eef2f6);
+}
+
+.kumo-list-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--kumo-color-subtle, #6b7280);
+  font-size: 12px;
+}
+
+.kumo-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kumo-placeholder {
+  padding: 22px;
+}
+
+.kumo-placeholder p {
+  max-width: 720px;
+  color: var(--kumo-color-subtle, #6b7280);
+}
+
+@media (max-width: 760px) {
+  .kumo-topbar {
+    padding: 0 14px;
+  }
+
+  .kumo-topbar-actions {
+    display: none;
+  }
+
+  .kumo-content {
+    padding: 16px;
+  }
+
+  .kumo-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
