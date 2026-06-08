@@ -1,18 +1,18 @@
 :root {
   color-scheme: light;
   --kumo-base: #ffffff;
-  --kumo-canvas: #f7f6f2;
-  --kumo-overlay: rgba(255, 255, 255, 0.92);
-  --kumo-control: #f3f1ea;
-  --kumo-tint: #eeece4;
-  --kumo-line: #e7e5de;
+  --kumo-canvas: #f8fafc;
+  --kumo-overlay: rgba(255, 255, 255, 0.94);
+  --kumo-control: #f4f6f8;
+  --kumo-tint: #eef2f6;
+  --kumo-line: #e1e7ef;
   --kumo-hairline: rgba(24, 24, 27, 0.1);
-  --kumo-strong: #171717;
-  --kumo-default: #3f3f46;
-  --kumo-subtle: #71717a;
-  --kumo-inactive: #a1a1aa;
-  --kumo-brand: #f05365;
-  --kumo-brand-hover: #ff6b7c;
+  --kumo-strong: #111827;
+  --kumo-default: #374151;
+  --kumo-subtle: #6b7280;
+  --kumo-inactive: #9ca3af;
+  --kumo-brand: #f48120;
+  --kumo-brand-hover: #f59b45;
   --kumo-success: #12a150;
   --kumo-warning: #b7791f;
   --kumo-danger: #e5484d;
@@ -24,19 +24,19 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --kumo-base: #121211;
-  --kumo-canvas: #080807;
-  --kumo-overlay: rgba(18, 18, 17, 0.9);
-  --kumo-control: #1d1c1a;
-  --kumo-tint: #25231f;
+  --kumo-base: #101318;
+  --kumo-canvas: #080a0f;
+  --kumo-overlay: rgba(16, 19, 24, 0.92);
+  --kumo-control: #171b22;
+  --kumo-tint: #202633;
   --kumo-line: rgba(255, 255, 255, 0.12);
   --kumo-hairline: rgba(255, 255, 255, 0.1);
-  --kumo-strong: #f5f5f3;
-  --kumo-default: #d6d3cc;
-  --kumo-subtle: #a8a29e;
-  --kumo-inactive: #78716c;
-  --kumo-brand: #ff6b7c;
-  --kumo-brand-hover: #ff8391;
+  --kumo-strong: #f8fafc;
+  --kumo-default: #d8dee9;
+  --kumo-subtle: #9aa4b2;
+  --kumo-inactive: #6f7a89;
+  --kumo-brand: #f59b45;
+  --kumo-brand-hover: #ffad5f;
   --kumo-success: #3dcc72;
   --kumo-warning: #f0b84d;
   --kumo-danger: #ff6b6f;
@@ -82,8 +82,12 @@ select {
 .app-sidebar {
   height: 100vh;
   border-right: 1px solid var(--kumo-line);
-  background: color-mix(in srgb, var(--kumo-base) 88%, transparent);
+  background: color-mix(in srgb, var(--kumo-base) 96%, transparent);
   backdrop-filter: blur(18px);
+}
+
+.app-sidebar.is-collapsed {
+  background: var(--kumo-base);
 }
 
 .app-sidebar .n-layout-sider-scroll-container {
@@ -94,52 +98,32 @@ select {
 
 .brand {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 11px;
   width: 100%;
-  min-height: 70px;
-  padding: 16px 18px;
+  min-height: 64px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--kumo-line);
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
   background: transparent;
-  text-align: left;
-  cursor: default;
-}
-
-.brand.is-collapsed {
-  justify-content: center;
-  padding-inline: 12px;
-  cursor: pointer;
-}
-
-.brand.is-collapsed:hover .brand-mark {
-  border-color: color-mix(in srgb, var(--kumo-brand) 40%, var(--kumo-line));
-  box-shadow: var(--kumo-button-shadow-hover);
-}
-
-.brand:focus-visible {
-  outline: 2px solid var(--kumo-brand);
-  outline-offset: -2px;
 }
 
 .brand-mark {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid var(--kumo-line);
   border-radius: 8px;
   background: var(--kumo-control);
-  box-shadow: var(--kumo-shadow);
+  box-shadow: none;
 }
 
 .brand-mark img {
   display: block;
-  width: 25px;
-  height: 25px;
+  width: 23px;
+  height: 23px;
 }
 
 .brand-copy {
@@ -149,7 +133,7 @@ select {
 .brand-name {
   overflow: hidden;
   color: var(--kumo-strong);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 720;
   line-height: 1.1;
   text-overflow: ellipsis;
@@ -159,7 +143,7 @@ select {
 .brand-subtitle {
   margin-top: 3px;
   color: var(--kumo-subtle);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 520;
   white-space: nowrap;
 }
@@ -167,44 +151,62 @@ select {
 .sidebar-section {
   flex: 1;
   min-height: 0;
-  padding: 14px 10px 80px;
+  padding: 14px 10px;
   overflow-y: auto;
 }
 
-.sidebar-section.is-collapsed {
-  padding-bottom: 190px;
+.sidebar-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-section::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kumo-subtle) 35%, transparent);
+  background-clip: content-box;
 }
 
 .sidebar-label {
-  padding: 0 12px 8px;
+  padding: 0 10px 8px;
   color: var(--kumo-inactive);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 680;
   line-height: 1;
   text-transform: uppercase;
 }
 
-.sidebar-footer {
-  position: absolute;
-  right: 10px;
-  bottom: 14px;
-  left: 10px;
+.collapsed-rail {
   display: flex;
+  height: 100%;
+  align-items: flex-start;
   justify-content: center;
-  gap: 4px;
-  padding: 8px;
-  border: 1px solid var(--kumo-line);
-  border-radius: 8px;
-  background: var(--kumo-overlay);
-  box-shadow: var(--kumo-shadow);
+  padding-top: 14px;
 }
 
-.sidebar-footer.is-collapsed {
-  right: 8px;
-  left: 8px;
-  flex-direction: column;
-  align-items: center;
+.sidebar-rail-toggle {
+  border: 1px solid var(--kumo-line);
+  background: var(--kumo-control);
+  color: var(--kumo-subtle);
+  box-shadow: none;
+  transition: background-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+}
+
+.sidebar-rail-toggle:hover,
+.sidebar-rail-toggle:focus-visible {
+  background: var(--kumo-tint);
+  color: var(--kumo-strong);
+  box-shadow: var(--kumo-button-shadow-hover);
+}
+
+.sidebar-footer {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  gap: 4px;
+  margin: 0 10px 12px;
   padding: 7px;
+  border-top: 1px solid var(--kumo-line);
+  background: transparent;
 }
 
 .app-main {
@@ -330,6 +332,7 @@ select {
 }
 
 .sidebar-footer .n-button,
+.sidebar-rail-toggle,
 .brand-mark {
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
@@ -337,7 +340,7 @@ select {
 .sidebar-footer .n-button {
   background: var(--kumo-control);
   color: var(--kumo-subtle);
-  box-shadow: var(--kumo-button-shadow);
+  box-shadow: none;
 }
 
 .sidebar-footer .n-button:hover,
@@ -355,6 +358,26 @@ select {
   font-size: 12px;
   font-weight: 720;
   letter-spacing: 0;
+}
+
+.app-sidebar .n-menu {
+  --n-item-text-color: var(--kumo-default) !important;
+  --n-item-text-color-hover: var(--kumo-strong) !important;
+  --n-item-icon-color: var(--kumo-subtle) !important;
+  --n-item-icon-color-hover: var(--kumo-strong) !important;
+}
+
+.app-sidebar .n-menu .n-menu-item-content {
+  margin: 1px 0;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.app-sidebar .n-menu .n-menu-item-content.n-menu-item-content--selected {
+  border-color: transparent;
+  background: var(--kumo-tint);
+  box-shadow: none;
 }
 
 .n-input,
@@ -401,9 +424,36 @@ select {
     z-index: 20;
   }
 
+  .app-sidebar.is-collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    border-right: 0;
+    overflow: visible !important;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .app-sidebar.is-collapsed .n-layout-sider-scroll-container {
+    width: 0;
+    min-width: 0;
+    overflow: visible !important;
+  }
+
+  .app-sidebar.is-collapsed .collapsed-rail {
+    position: fixed;
+    top: 12px;
+    left: 10px;
+    z-index: 40;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    pointer-events: auto;
+  }
+
   .topbar {
     height: 64px;
-    padding: 0 14px;
+    padding: 0 14px 0 58px;
   }
 
   .topbar-actions .command-button {

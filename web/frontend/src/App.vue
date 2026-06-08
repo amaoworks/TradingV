@@ -11,98 +11,109 @@
           <n-layout class="app-shell" has-sider>
             <n-layout-sider
               class="app-sidebar"
+              :class="{ 'is-collapsed': collapsed }"
               :width="248"
-              :collapsed-width="72"
+              :collapsed-width="56"
               collapse-mode="width"
               :collapsed="collapsed"
               @update:collapsed="(v: boolean) => collapsed = v"
             >
-              <button
-                class="brand"
-                :class="{ 'is-collapsed': collapsed }"
-                type="button"
-                :aria-label="collapsed ? t('app.expandSidebar') : 'TradingV'"
-                @click="collapsed && (collapsed = false)"
-              >
-                <div class="brand-mark">
-                  <img src="/favicon.svg" alt="TradingV" />
-                </div>
-                <div v-if="!collapsed" class="brand-copy">
-                  <div class="brand-name">TradingV</div>
-                  <div class="brand-subtitle">AI Trading Workspace</div>
-                </div>
-              </button>
-
-              <div class="sidebar-section" :class="{ 'is-collapsed': collapsed }">
-                <div v-if="!collapsed" class="sidebar-label">{{ t('app.workspace') }}</div>
-                <n-menu
-                  :collapsed="collapsed"
-                  :collapsed-width="52"
-                  :collapsed-icon-size="21"
-                  :icon-size="18"
-                  :options="menuOptions"
-                  :value="currentKey"
-                  @update:value="onMenuSelect"
-                />
+              <div v-if="collapsed" class="collapsed-rail">
+                <n-tooltip trigger="hover" placement="right">
+                  <template #trigger>
+                    <n-button quaternary circle class="sidebar-rail-toggle" @click="collapsed = false">
+                      <template #icon>
+                        <n-icon>
+                          <ChevronForwardOutline />
+                        </n-icon>
+                      </template>
+                    </n-button>
+                  </template>
+                  {{ t('app.expandSidebar') }}
+                </n-tooltip>
               </div>
 
-              <div class="sidebar-footer" :class="{ 'is-collapsed': collapsed }">
-                <n-tooltip trigger="hover">
-                  <template #trigger>
-                    <n-button quaternary circle @click="collapsed = !collapsed">
-                      <template #icon>
-                        <n-icon>
-                          <ChevronForwardOutline v-if="collapsed" />
-                          <ChevronBackOutline v-else />
-                        </n-icon>
-                      </template>
-                    </n-button>
-                  </template>
-                  {{ collapsed ? t('app.expandSidebar') : t('app.collapseSidebar') }}
-                </n-tooltip>
+              <template v-else>
+                <div class="brand" aria-label="TradingV">
+                  <div class="brand-mark">
+                    <img src="/favicon.svg" alt="TradingV" />
+                  </div>
+                  <div class="brand-copy">
+                    <div class="brand-name">TradingV</div>
+                    <div class="brand-subtitle">AI Trading Workspace</div>
+                  </div>
+                </div>
 
-                <n-tooltip trigger="hover">
-                  <template #trigger>
-                    <n-button quaternary class="locale-toggle" @click="toggleLocale">
-                      {{ locale === 'zh-CN' ? 'EN' : '中' }}
-                    </n-button>
-                  </template>
-                  {{ t('app.switchLanguage') }}
-                </n-tooltip>
+                <div class="sidebar-section">
+                  <div class="sidebar-label">{{ t('app.workspace') }}</div>
+                  <n-menu
+                    :collapsed="false"
+                    :collapsed-width="52"
+                    :collapsed-icon-size="21"
+                    :icon-size="18"
+                    :options="menuOptions"
+                    :value="currentKey"
+                    @update:value="onMenuSelect"
+                  />
+                </div>
 
-                <n-tooltip trigger="hover">
-                  <template #trigger>
-                    <n-button quaternary circle @click="toggleAppearance">
-                      <template #icon>
-                        <n-icon>
-                          <SunnyOutline v-if="isDark" />
-                          <MoonOutline v-else />
-                        </n-icon>
-                      </template>
-                    </n-button>
-                  </template>
-                  {{ isDark ? t('app.lightMode') : t('app.darkMode') }}
-                </n-tooltip>
+                <div class="sidebar-footer">
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <n-button quaternary circle @click="collapsed = true">
+                        <template #icon>
+                          <n-icon>
+                            <ChevronBackOutline />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                    </template>
+                    {{ t('app.collapseSidebar') }}
+                  </n-tooltip>
 
-                <n-tooltip trigger="hover">
-                  <template #trigger>
-                    <n-button quaternary circle @click="toggleThemeColor">
-                      <template #icon>
-                        <n-icon>
-                          <ColorPaletteOutline />
-                        </n-icon>
-                      </template>
-                    </n-button>
-                  </template>
-                  {{ isRedTheme ? t('app.themeRed') : t('app.themeGreen') }}
-                </n-tooltip>
-              </div>
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <n-button quaternary class="locale-toggle" @click="toggleLocale">
+                        {{ locale === 'zh-CN' ? 'EN' : '中' }}
+                      </n-button>
+                    </template>
+                    {{ t('app.switchLanguage') }}
+                  </n-tooltip>
+
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <n-button quaternary circle @click="toggleAppearance">
+                        <template #icon>
+                          <n-icon>
+                            <SunnyOutline v-if="isDark" />
+                            <MoonOutline v-else />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                    </template>
+                    {{ isDark ? t('app.lightMode') : t('app.darkMode') }}
+                  </n-tooltip>
+
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <n-button quaternary circle @click="toggleThemeColor">
+                        <template #icon>
+                          <n-icon>
+                            <ColorPaletteOutline />
+                          </n-icon>
+                        </template>
+                      </n-button>
+                    </template>
+                    {{ isRedTheme ? t('app.themeRed') : t('app.themeGreen') }}
+                  </n-tooltip>
+                </div>
+              </template>
             </n-layout-sider>
 
             <n-layout class="app-main">
               <n-layout-header class="topbar">
                 <div class="topbar-left">
-                  <n-button quaternary circle class="mobile-menu" @click="collapsed = !collapsed">
+                  <n-button v-if="!collapsed" quaternary circle class="mobile-menu" @click="collapsed = true">
                     <template #icon>
                       <n-icon><AppsOutline /></n-icon>
                     </template>
@@ -202,22 +213,22 @@ const themeOverrides = computed(() => ({
     borderRadius: '8px',
     borderRadiusSmall: '6px',
     fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    primaryColor: isRedTheme.value ? '#f05365' : '#12a150',
-    primaryColorHover: isRedTheme.value ? '#ff6b7c' : '#21b866',
-    primaryColorPressed: isRedTheme.value ? '#cc314a' : '#087a39',
-    primaryColorSuppl: isRedTheme.value ? '#ff6b7c' : '#21b866',
+    primaryColor: isRedTheme.value ? '#f48120' : '#12a150',
+    primaryColorHover: isRedTheme.value ? '#f59b45' : '#21b866',
+    primaryColorPressed: isRedTheme.value ? '#d86a13' : '#087a39',
+    primaryColorSuppl: isRedTheme.value ? '#f59b45' : '#21b866',
     infoColor: '#276ef1',
     successColor: '#12a150',
     warningColor: '#b7791f',
     errorColor: '#e5484d',
-    textColor1: isDark.value ? '#f5f5f3' : '#171717',
-    textColor2: isDark.value ? '#d6d3cc' : '#3f3f46',
-    textColor3: isDark.value ? '#a8a29e' : '#71717a',
-    bodyColor: isDark.value ? '#080807' : '#f7f6f2',
-    cardColor: isDark.value ? '#121211' : '#ffffff',
-    modalColor: isDark.value ? '#171716' : '#ffffff',
-    borderColor: isDark.value ? 'rgba(255, 255, 255, 0.12)' : '#e7e5de',
-    dividerColor: isDark.value ? 'rgba(255, 255, 255, 0.1)' : '#ece9df',
+    textColor1: isDark.value ? '#f8fafc' : '#111827',
+    textColor2: isDark.value ? '#d8dee9' : '#374151',
+    textColor3: isDark.value ? '#9aa4b2' : '#6b7280',
+    bodyColor: isDark.value ? '#080a0f' : '#f8fafc',
+    cardColor: isDark.value ? '#101318' : '#ffffff',
+    modalColor: isDark.value ? '#101318' : '#ffffff',
+    borderColor: isDark.value ? 'rgba(255, 255, 255, 0.12)' : '#e1e7ef',
+    dividerColor: isDark.value ? 'rgba(255, 255, 255, 0.1)' : '#e1e7ef',
   },
   Card: {
     borderRadius: '8px',
@@ -246,19 +257,19 @@ const themeOverrides = computed(() => ({
     },
   },
   DataTable: {
-    thColor: isDark.value ? '#171716' : '#fbfaf7',
-    thTextColor: isDark.value ? '#d6d3cc' : '#52525b',
+    thColor: isDark.value ? '#171b22' : '#f4f6f8',
+    thTextColor: isDark.value ? '#d8dee9' : '#4b5563',
     borderRadius: '8px',
   },
   Menu: {
     itemHeight: '38px',
     itemBorderRadius: '8px',
-    itemTextColor: isDark.value ? '#d6d3cc' : '#52525b',
-    itemTextColorActive: isDark.value ? '#ffffff' : '#171717',
-    itemIconColorActive: isRedTheme.value ? '#f05365' : '#12a150',
-    itemColorActive: isDark.value ? 'rgba(255,255,255,0.08)' : '#f1efe8',
-    itemColorHover: isDark.value ? 'rgba(255,255,255,0.06)' : '#f6f4ed',
-    itemColorActiveHover: isDark.value ? 'rgba(255,255,255,0.1)' : '#f1efe8',
+    itemTextColor: isDark.value ? '#d8dee9' : '#374151',
+    itemTextColorActive: isDark.value ? '#ffffff' : '#111827',
+    itemIconColorActive: isRedTheme.value ? '#f48120' : '#12a150',
+    itemColorActive: isDark.value ? 'rgba(255,255,255,0.08)' : '#eef2f6',
+    itemColorHover: isDark.value ? 'rgba(255,255,255,0.06)' : '#f4f6f8',
+    itemColorActiveHover: isDark.value ? 'rgba(255,255,255,0.1)' : '#eef2f6',
   },
 }))
 
