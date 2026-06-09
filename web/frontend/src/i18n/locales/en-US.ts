@@ -150,7 +150,7 @@ export default {
     subtitle: 'System overview',
     sysStatus: 'System status',
     apiConnected: 'API connected',
-    quickNew: '+ New analysis',
+    quickNew: 'New analysis',
     recent: 'Recent analyses',
     noRecent: 'No analyses yet',
     signalDist: 'Signal distribution',
@@ -229,7 +229,7 @@ export default {
   history: {
     title: 'History',
     subtitle: 'All past analyses',
-    newAnalysis: '+ New analysis',
+    newAnalysis: 'New analysis',
     tickerPlaceholder: 'Ticker',
     signal: 'Signal',
     dateFrom: 'From',

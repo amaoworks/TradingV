@@ -19,6 +19,7 @@ import {
 import {
   CaretLeft,
   List,
+  MagnifyingGlass,
   Moon,
   RocketLaunch,
   Sun,
@@ -167,11 +168,10 @@ export function KumoShell() {
                   <h1>{currentTitle}</h1>
                 </div>
                 <div className="kumo-topbar-actions">
-                  <Button variant="secondary" onClick={() => navigate('/screener')}>
+                  <Button variant="secondary" icon={MagnifyingGlass} onClick={() => navigate('/screener')}>
                     {t('menu.screener')}
                   </Button>
-                  <Button onClick={() => navigate('/analyze')}>
-                    <RocketLaunch size={16} />
+                  <Button icon={RocketLaunch} onClick={() => navigate('/analyze')}>
                     {t('menu.analyze')}
                   </Button>
                 </div>

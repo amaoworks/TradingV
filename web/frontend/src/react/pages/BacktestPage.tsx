@@ -10,7 +10,7 @@ import {
   Tabs,
 } from '@cloudflare/kumo'
 import type { BadgeVariant } from '@cloudflare/kumo'
-import { ChartLine, Plus, Trash } from '@phosphor-icons/react'
+import { ChartLine, Play, Plus, Trash, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
@@ -241,8 +241,7 @@ export function BacktestPage() {
         title={t('backtest.title')}
         subtitle={t('backtest.subtitle')}
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus size={16} />
+          <Button icon={Plus} onClick={() => setCreateOpen(true)}>
             {t('backtest.newBtn')}
           </Button>
         }
@@ -384,8 +383,8 @@ export function BacktestPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={running} onClick={runBacktest}>{t('backtest.btn.run')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Play} loading={running} onClick={runBacktest}>{t('backtest.btn.run')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>
@@ -537,12 +536,10 @@ function RunsTable({
             <Table.Cell>{run.metrics?.win_rate_pct != null ? `${run.metrics.win_rate_pct.toFixed(0)}%` : '-'}</Table.Cell>
             <Table.Cell>
               <div className="kumo-row-actions">
-                <Button size="sm" onClick={() => onView(run)}>
-                  <ChartLine size={15} />
+                <Button size="sm" icon={ChartLine} onClick={() => onView(run)}>
                   {t('backtest.btn.view')}
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => onDelete(run)}>
-                  <Trash size={15} />
+                <Button size="sm" icon={Trash} variant="secondary" onClick={() => onDelete(run)}>
                   {t('backtest.btn.delete')}
                 </Button>
               </div>

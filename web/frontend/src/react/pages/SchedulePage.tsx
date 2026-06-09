@@ -9,7 +9,7 @@ import {
   Select,
   Table,
 } from '@cloudflare/kumo'
-import { Play, Plus } from '@phosphor-icons/react'
+import { Check, Eye, FloppyDisk, Pause, Play, Plus, Trash, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
@@ -186,8 +186,7 @@ export function SchedulePage() {
         title={t('schedule.title')}
         subtitle={t('schedule.subtitle')}
         actions={
-          <Button onClick={openCreate}>
-            <Plus size={16} />
+          <Button icon={Plus} onClick={openCreate}>
             {t('schedule.newTask')}
           </Button>
         }
@@ -231,26 +230,26 @@ export function SchedulePage() {
                   <Table.Cell>{formatDate(schedule.last_run_at)}</Table.Cell>
                   <Table.Cell>
                     <div className="kumo-row-actions">
-                      <Button size="sm" onClick={() => triggerNow(schedule)}>
-                        <Play size={14} />
+                      <Button size="sm" icon={Play} onClick={() => triggerNow(schedule)}>
                         {t('schedule.btn.runNow')}
                       </Button>
                       {schedule.last_analysis_id ? (
                         <Link to={`/report/${schedule.last_analysis_id}`} className="kumo-link-reset">
-                          <Button size="sm">{t('schedule.btn.viewLatest')}</Button>
+                          <Button size="sm" icon={Eye}>{t('schedule.btn.viewLatest')}</Button>
                         </Link>
                       ) : null}
                       {schedule.status === 'active' ? (
-                        <Button size="sm" onClick={() => setStatus(schedule, 'paused')}>
+                        <Button size="sm" icon={Pause} onClick={() => setStatus(schedule, 'paused')}>
                           {t('schedule.btn.pause')}
                         </Button>
                       ) : (
-                        <Button size="sm" onClick={() => setStatus(schedule, 'active')}>
+                        <Button size="sm" icon={Check} onClick={() => setStatus(schedule, 'active')}>
                           {t('schedule.btn.enable')}
                         </Button>
                       )}
                       <Button
                         size="sm"
+                        icon={Trash}
                         variant="secondary-destructive"
                         onClick={() => deleteSchedule(schedule)}
                       >
@@ -362,8 +361,8 @@ export function SchedulePage() {
             </div>
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={saving} onClick={save}>{t('common.save')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={FloppyDisk} loading={saving} onClick={save}>{t('common.save')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>

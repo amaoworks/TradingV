@@ -1,5 +1,5 @@
 import { Badge, Button, Input, Select, Table } from '@cloudflare/kumo'
-import { Plus } from '@phosphor-icons/react'
+import { ArrowsClockwise, Eye, Plus, Trash } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, PaginationBar, SectionCard } from '../components/Page'
@@ -76,8 +76,7 @@ export function HistoryPage() {
         subtitle={t('history.subtitle')}
         actions={
           <Link to="/analyze" className="kumo-link-reset">
-            <Button>
-              <Plus size={16} />
+            <Button icon={Plus}>
               {t('history.newAnalysis')}
             </Button>
           </Link>
@@ -115,7 +114,7 @@ export function HistoryPage() {
             value={filters.dateTo}
             onChange={(event) => updateFilter('dateTo', event.currentTarget.value)}
           />
-          <Button onClick={() => {
+          <Button icon={ArrowsClockwise} onClick={() => {
             setPage(1)
             load(1)
           }}>
@@ -153,10 +152,11 @@ export function HistoryPage() {
                     <Table.Cell>
                       <div className="kumo-row-actions">
                         <Link to={`/report/${item.id}`} className="kumo-link-reset">
-                          <Button size="sm">{t('history.detail')}</Button>
+                          <Button size="sm" icon={Eye}>{t('history.detail')}</Button>
                         </Link>
                         <Button
                           size="sm"
+                          icon={Trash}
                           variant="secondary-destructive"
                           onClick={() => deleteReport(item.id)}
                         >

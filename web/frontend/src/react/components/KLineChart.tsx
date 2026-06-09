@@ -1,4 +1,5 @@
 import { Banner, Button, Radio, Switch } from '@cloudflare/kumo'
+import { ArrowsClockwise, CornersIn, CornersOut } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { dispose, init, LineType, TooltipShowRule, type Chart } from 'klinecharts'
 import api from '../lib/api'
@@ -190,8 +191,13 @@ export function KLineChart({
           checked={autoRefresh}
           onCheckedChange={setAutoRefresh}
         />
-        <Button size="sm" loading={loading} onClick={reload}>{t('kline.refresh')}</Button>
-        <Button size="sm" variant="ghost" onClick={() => setFullscreen((value) => !value)}>
+        <Button size="sm" icon={ArrowsClockwise} loading={loading} onClick={reload}>{t('kline.refresh')}</Button>
+        <Button
+          size="sm"
+          icon={fullscreen ? CornersIn : CornersOut}
+          variant="ghost"
+          onClick={() => setFullscreen((value) => !value)}
+        >
           {fullscreen ? t('kline.exitFullscreen') : t('kline.fullscreen')}
         </Button>
       </div>

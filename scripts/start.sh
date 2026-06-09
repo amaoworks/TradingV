@@ -266,13 +266,14 @@ start_frontend() {
 }
 
 start_all() {
-  local backend_pid="" frontend_pid=""
+  local backend_pid="" frontend_pid="" cleanup_ran=0
 
   resolve_ports
   if [[ "$SHOW_COMMAND" == "1" ]]; then
     echo "Backend command: $(backend_command)"
   fi
   print_open_hint
+  echo "Press Ctrl+C to stop frontend and backend."
   (
     PRINT_URLS=0
     start_backend
@@ -285,13 +286,53 @@ start_all() {
   ) &
   frontend_pid=$!
 
+  list_descendants() {
+    local pid="$1" child
+
+    if ! command_exists pgrep; then
+      return
+    fi
+
+    for child in $(pgrep -P "$pid" 2>/dev/null || true); do
+      list_descendants "$child"
+      printf '%s\n' "$child"
+    done
+  }
+
+  terminate_process_tree() {
+    local root_pid="$1" pid
+    local pids=""
+
+    if [[ -z "$root_pid" ]] || ! kill -0 "$root_pid" >/dev/null 2>&1; then
+      return
+    fi
+
+    if command_exists pgrep; then
+      pids="$(list_descendants "$root_pid")"
+    fi
+    pids="${pids}"$'\n'"${root_pid}"
+
+    for pid in $pids; do
+      kill "$pid" >/dev/null 2>&1 || true
+    done
+
+    sleep 1
+
+    for pid in $pids; do
+      if kill -0 "$pid" >/dev/null 2>&1; then
+        kill -KILL "$pid" >/dev/null 2>&1 || true
+      fi
+    done
+  }
+
   cleanup() {
-    if [[ -n "${backend_pid:-}" ]]; then
-      kill "$backend_pid" >/dev/null 2>&1 || true
+    if [[ "${cleanup_ran:-0}" == "1" ]]; then
+      return
     fi
-    if [[ -n "${frontend_pid:-}" ]]; then
-      kill "$frontend_pid" >/dev/null 2>&1 || true
-    fi
+    cleanup_ran=1
+    trap - INT TERM EXIT
+    terminate_process_tree "${frontend_pid:-}"
+    terminate_process_tree "${backend_pid:-}"
   }
   trap cleanup INT TERM EXIT
 

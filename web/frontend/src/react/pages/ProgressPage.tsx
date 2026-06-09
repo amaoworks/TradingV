@@ -152,9 +152,8 @@ export function ProgressPage() {
           <div className="kumo-final-decision">
             <h2>{finalSignal}</h2>
             <Link to={`/report/${analysisId}`} className="kumo-link-reset">
-              <Button>
+              <Button icon={ArrowRight}>
                 {t('progress.viewReport')}
-                <ArrowRight size={16} />
               </Button>
             </Link>
           </div>

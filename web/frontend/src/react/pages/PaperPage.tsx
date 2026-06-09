@@ -8,7 +8,7 @@ import {
   Table,
   Tabs,
 } from '@cloudflare/kumo'
-import { ArrowCounterClockwise, ArrowsClockwise, ChartLine, Plus } from '@phosphor-icons/react'
+import { ArrowCounterClockwise, ArrowsClockwise, ChartLine, Check, Plus, Trash, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { KLineChart } from '../components/KLineChart'
@@ -243,16 +243,13 @@ export function PaperPage() {
         subtitle={t('paper.subtitle')}
         actions={
           <>
-            <Button loading={snapshotting} onClick={takeSnapshot}>
-              <ArrowsClockwise size={16} />
+            <Button icon={ArrowsClockwise} loading={snapshotting} onClick={takeSnapshot}>
               {t('paper.snapshotBtn')}
             </Button>
-            <Button onClick={openOrder}>
-              <Plus size={16} />
+            <Button icon={Plus} onClick={openOrder}>
               {t('paper.manualOrder')}
             </Button>
-            <Button variant="secondary-destructive" onClick={resetAccount}>
-              <ArrowCounterClockwise size={16} />
+            <Button icon={ArrowCounterClockwise} variant="secondary-destructive" onClick={resetAccount}>
               {t('paper.resetAccount')}
             </Button>
           </>
@@ -363,8 +360,8 @@ export function PaperPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button variant="destructive" loading={placing} onClick={submitSell}>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Trash} variant="destructive" loading={placing} onClick={submitSell}>
               {t('paper.sellFields.confirm')}
             </Button>
           </div>
@@ -414,8 +411,8 @@ export function PaperPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={placing} onClick={placeOrder}>{t('common.submit')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Check} loading={placing} onClick={placeOrder}>{t('common.submit')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>
@@ -466,12 +463,11 @@ function PositionsTable({
             </Table.Cell>
             <Table.Cell>
               <div className="kumo-row-actions">
-                <Button size="sm" variant="secondary-destructive" onClick={() => onSell(position)}>
+                <Button size="sm" icon={Trash} variant="secondary-destructive" onClick={() => onSell(position)}>
                   {t('paper.posBtn.sell')}
                 </Button>
-                <Button size="sm" onClick={() => onFlatten(position)}>{t('paper.posBtn.flatten')}</Button>
-                <Button size="sm" onClick={() => onKline(position)}>
-                  <ChartLine size={14} />
+                <Button size="sm" icon={X} onClick={() => onFlatten(position)}>{t('paper.posBtn.flatten')}</Button>
+                <Button size="sm" icon={ChartLine} onClick={() => onKline(position)}>
                   {t('paper.posBtn.kline')}
                 </Button>
               </div>

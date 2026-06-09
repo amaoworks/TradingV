@@ -150,7 +150,7 @@ export default {
     subtitle: '系统概览',
     sysStatus: '系统状态',
     apiConnected: 'API 已连接',
-    quickNew: '+ 新建分析',
+    quickNew: '新建分析',
     recent: '最近分析',
     noRecent: '暂无分析记录',
     signalDist: '信号分布',
@@ -229,7 +229,7 @@ export default {
   history: {
     title: '历史记录',
     subtitle: '所有分析记录',
-    newAnalysis: '+ 新建分析',
+    newAnalysis: '新建分析',
     tickerPlaceholder: '股票代码',
     signal: '信号',
     dateFrom: '开始日期',

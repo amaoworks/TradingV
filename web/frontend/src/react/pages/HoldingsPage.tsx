@@ -10,7 +10,7 @@ import {
   Table,
   Textarea,
 } from '@cloudflare/kumo'
-import { CalendarPlus, ChartLine, Plus, UploadSimple } from '@phosphor-icons/react'
+import { CalendarPlus, ChartLine, Check, MagnifyingGlass, PencilSimple, Plus, Trash, UploadSimple, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { KLineChart } from '../components/KLineChart'
@@ -281,16 +281,13 @@ export function HoldingsPage() {
         subtitle={t('holdings.subtitle')}
         actions={
           <>
-            <Button disabled={!holdings.length} onClick={() => setScheduleOpen(true)}>
-              <CalendarPlus size={16} />
+            <Button icon={CalendarPlus} disabled={!holdings.length} onClick={() => setScheduleOpen(true)}>
               {t('holdings.addToSchedule')}
             </Button>
-            <Button onClick={() => setImportOpen(true)}>
-              <UploadSimple size={16} />
+            <Button icon={UploadSimple} onClick={() => setImportOpen(true)}>
               {t('holdings.importCsv')}
             </Button>
-            <Button onClick={openCreate}>
-              <Plus size={16} />
+            <Button icon={Plus} onClick={openCreate}>
               {t('holdings.addHolding')}
             </Button>
           </>
@@ -355,13 +352,12 @@ export function HoldingsPage() {
                     <Table.Cell>{holding.notes || '-'}</Table.Cell>
                     <Table.Cell>
                       <div className="kumo-row-actions">
-                        <Button size="sm" onClick={() => analyzeHolding(holding)}>{t('holdings.btn.analyze')}</Button>
-                        <Button size="sm" onClick={() => setKlineTicker(holding.ticker)}>
-                          <ChartLine size={14} />
+                        <Button size="sm" icon={MagnifyingGlass} onClick={() => analyzeHolding(holding)}>{t('holdings.btn.analyze')}</Button>
+                        <Button size="sm" icon={ChartLine} onClick={() => setKlineTicker(holding.ticker)}>
                           {t('holdings.btn.kline')}
                         </Button>
-                        <Button size="sm" onClick={() => openEdit(holding)}>{t('holdings.btn.edit')}</Button>
-                        <Button size="sm" variant="secondary-destructive" onClick={() => deleteHolding(holding)}>
+                        <Button size="sm" icon={PencilSimple} onClick={() => openEdit(holding)}>{t('holdings.btn.edit')}</Button>
+                        <Button size="sm" icon={Trash} variant="secondary-destructive" onClick={() => deleteHolding(holding)}>
                           {t('holdings.btn.delete')}
                         </Button>
                       </div>
@@ -427,8 +423,8 @@ export function HoldingsPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={saving} onClick={saveHolding}>{t('common.save')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Check} loading={saving} onClick={saveHolding}>{t('common.save')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>
@@ -487,8 +483,8 @@ export function HoldingsPage() {
             </Checkbox.Group>
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={scheduling} onClick={bulkSchedule}>{t('holdings.schedule.createBtn')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={CalendarPlus} loading={scheduling} onClick={bulkSchedule}>{t('holdings.schedule.createBtn')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>
@@ -507,8 +503,8 @@ export function HoldingsPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={importing} disabled={!csvText.trim()} onClick={importHoldings}>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={UploadSimple} loading={importing} disabled={!csvText.trim()} onClick={importHoldings}>
               {t('holdings.csv.submit')}
             </Button>
           </div>

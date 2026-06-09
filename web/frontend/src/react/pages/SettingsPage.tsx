@@ -9,6 +9,7 @@ import {
   Switch,
   Table,
 } from '@cloudflare/kumo'
+import { Check, FloppyDisk, PencilSimple, Plus, Trash, X } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { ModelPicker } from '../components/ModelPicker'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
@@ -229,7 +230,7 @@ export function SettingsPage() {
         ) : !providers.length ? (
           <div className="kumo-settings-empty">
             <p>{t('settings.providerPlaceholder')}</p>
-            <Button size="sm" onClick={() => openProviderModal()}>{t('settings.addProvider')}</Button>
+            <Button size="sm" icon={Plus} onClick={() => openProviderModal()}>{t('settings.addProvider')}</Button>
           </div>
         ) : (
           <div className="kumo-form-grid kumo-settings-llm-grid">
@@ -270,7 +271,7 @@ export function SettingsPage() {
 
       <SectionCard
         title={t('settings.apiKeysCard')}
-        extra={<Button size="sm" onClick={() => openProviderModal()}>{t('settings.addProvider')}</Button>}
+        extra={<Button size="sm" icon={Plus} onClick={() => openProviderModal()}>{t('settings.addProvider')}</Button>}
       >
         <Banner variant="secondary" title={t('settings.apiKeysInfo')} />
         {providers.length ? (
@@ -299,11 +300,12 @@ export function SettingsPage() {
                   <Table.Cell>{provider.base_url || provider.default_base_url || '-'}</Table.Cell>
                   <Table.Cell>
                     <div className="kumo-row-actions">
-                      <Button size="sm" onClick={() => openProviderModal(provider.provider)}>
+                      <Button size="sm" icon={PencilSimple} onClick={() => openProviderModal(provider.provider)}>
                         {t('common.edit')}
                       </Button>
                       <Button
                         size="sm"
+                        icon={Trash}
                         variant="secondary-destructive"
                         onClick={() => deleteProviderConnection(provider.provider)}
                       >
@@ -379,7 +381,7 @@ export function SettingsPage() {
       </SectionCard>
 
       <div className="kumo-form-actions">
-        <Button loading={saving} onClick={save}>{t('settings.saveBtn')}</Button>
+        <Button icon={FloppyDisk} loading={saving} onClick={save}>{t('settings.saveBtn')}</Button>
       </div>
 
       <Dialog.Root open={providerDialogOpen} onOpenChange={setProviderDialogOpen}>
@@ -414,8 +416,8 @@ export function SettingsPage() {
             </div>
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={savingProvider} onClick={saveProviderConnection}>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Check} loading={savingProvider} onClick={saveProviderConnection}>
               {t('common.save')}
             </Button>
           </div>

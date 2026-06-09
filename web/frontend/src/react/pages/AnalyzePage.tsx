@@ -8,7 +8,7 @@ import {
   Select,
   Switch,
 } from '@cloudflare/kumo'
-import { RocketLaunch } from '@phosphor-icons/react'
+import { MagicWand, RocketLaunch } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ModelPicker } from '../components/ModelPicker'
@@ -205,7 +205,7 @@ export function AnalyzePage() {
               if (event.key === 'Enter') runParse()
             }}
           />
-          <Button loading={parsing} disabled={!nlQuery.trim()} onClick={runParse}>
+          <Button icon={MagicWand} loading={parsing} disabled={!nlQuery.trim()} onClick={runParse}>
             {t('analyze.runParse')}
           </Button>
         </div>
@@ -319,8 +319,7 @@ export function AnalyzePage() {
           />
         </div>
         <div className="kumo-form-actions">
-          <Button loading={submitting} onClick={submit}>
-            <RocketLaunch size={16} />
+          <Button icon={RocketLaunch} loading={submitting} onClick={submit}>
             {t('analyze.startAnalysis')}
           </Button>
         </div>

@@ -9,7 +9,7 @@ import {
   Select,
   Table,
 } from '@cloudflare/kumo'
-import { ClockCounterClockwise, MagnifyingGlass } from '@phosphor-icons/react'
+import { Check, ClockCounterClockwise, MagnifyingGlass, Plus, RocketLaunch, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
@@ -347,8 +347,7 @@ export function ScreenerPage() {
             value={topN}
             onChange={(event) => setTopN(Number(event.currentTarget.value))}
           />
-          <Button loading={running} onClick={startScreen}>
-            <MagnifyingGlass size={16} />
+          <Button icon={MagnifyingGlass} loading={running} onClick={startScreen}>
             {running ? t('screener.running') : t('screener.start')}
           </Button>
         </div>
@@ -381,11 +380,10 @@ export function ScreenerPage() {
             items={directionItems}
             onValueChange={(value) => setMomentumDirection(String(value || 'up'))}
           />
-          <Button size="sm" onClick={() => {
+          <Button size="sm" icon={ClockCounterClockwise} onClick={() => {
             setHistoryOpen(true)
             refreshHistory()
           }}>
-            <ClockCounterClockwise size={16} />
             {historyItems.length
               ? t('screener.historyCount', { n: historyItems.length })
               : t('screener.history')}
@@ -429,8 +427,8 @@ export function ScreenerPage() {
         extra={selected.length ? (
           <div className="kumo-row-actions">
             <span className="kumo-muted-text">{t('screener.selected', { n: selected.length })}</span>
-            <Button size="sm" onClick={() => setSizingOpen(true)}>{t('screener.addToPaper')}</Button>
-            <Button size="sm" loading={analyzing} onClick={batchAnalyze}>{t('screener.batchAnalyze')}</Button>
+            <Button size="sm" icon={Plus} onClick={() => setSizingOpen(true)}>{t('screener.addToPaper')}</Button>
+            <Button size="sm" icon={RocketLaunch} loading={analyzing} onClick={batchAnalyze}>{t('screener.batchAnalyze')}</Button>
           </div>
         ) : null}
       >
@@ -533,8 +531,8 @@ export function ScreenerPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={addingPaper} onClick={confirmAddToPaper}>{t('screener.confirmBuy')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Check} loading={addingPaper} onClick={confirmAddToPaper}>{t('screener.confirmBuy')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>

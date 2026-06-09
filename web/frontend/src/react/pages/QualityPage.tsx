@@ -8,7 +8,7 @@ import {
   Select,
   Table,
 } from '@cloudflare/kumo'
-import { ArrowsClockwise } from '@phosphor-icons/react'
+import { ArrowsClockwise, Eye } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
@@ -212,8 +212,7 @@ export function QualityPage() {
               <Radio.Item value="30" label={t('quality.horizon.d30')} />
               <Radio.Item value="60" label={t('quality.horizon.d60')} />
             </Radio.Group>
-            <Button variant="secondary" loading={loading} onClick={() => loadAll()}>
-              <ArrowsClockwise size={16} />
+            <Button icon={ArrowsClockwise} variant="secondary" loading={loading} onClick={() => loadAll()}>
               {t('common.refresh')}
             </Button>
           </div>
@@ -503,7 +502,7 @@ function DecisionTable({
             </Table.Cell>
             <Table.Cell>
               <Link to={`/report/${row.id}`} className="kumo-link-reset">
-                <Button size="sm" variant="secondary">{t('quality.decisions.openReport')}</Button>
+                <Button size="sm" icon={Eye} variant="secondary">{t('quality.decisions.openReport')}</Button>
               </Link>
             </Table.Cell>
           </Table.Row>

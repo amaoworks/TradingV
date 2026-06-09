@@ -9,7 +9,7 @@ import {
   Table,
   Tabs,
 } from '@cloudflare/kumo'
-import { DownloadSimple, RocketLaunch } from '@phosphor-icons/react'
+import { Check, DownloadSimple, Plus, RocketLaunch, X } from '@phosphor-icons/react'
 import { marked } from 'marked'
 import { useCallback, useMemo, useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -182,15 +182,13 @@ export function ReportDetailPage() {
         actions={
           <div className="kumo-page-actions">
             {analysis?.signal ? <Badge variant={signalBadgeVariant(analysis.signal)}>{analysis.signal}</Badge> : null}
-            <Button variant="secondary" onClick={exportMarkdown}>
-              <DownloadSimple size={16} />
+            <Button icon={DownloadSimple} variant="secondary" onClick={exportMarkdown}>
               {t('report.exportMd')}
             </Button>
-            <Button variant="secondary" disabled={!canPaperOrder} onClick={() => setPaperOpen(true)}>
+            <Button icon={Plus} variant="secondary" disabled={!canPaperOrder} onClick={() => setPaperOpen(true)}>
               {t('report.paperOrderBtn')}
             </Button>
-            <Button onClick={() => navigate('/analyze')}>
-              <RocketLaunch size={16} />
+            <Button icon={RocketLaunch} onClick={() => navigate('/analyze')}>
               {t('report.reAnalyze')}
             </Button>
           </div>
@@ -309,8 +307,8 @@ export function ReportDetailPage() {
             />
           </div>
           <div className="kumo-dialog-actions">
-            <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />
-            <Button loading={placing} onClick={submitPaperOrder}>{t('common.submit')}</Button>
+            <Dialog.Close render={(props) => <Button icon={X} {...props}>{t('common.cancel')}</Button>} />
+            <Button icon={Check} loading={placing} onClick={submitPaperOrder}>{t('common.submit')}</Button>
           </div>
         </Dialog>
       </Dialog.Root>
