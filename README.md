@@ -1,183 +1,171 @@
 # TradingV
 
 > **可视化多智能体 LLM 交易研究平台 — 看见 Agent 怎么想、怎么辩、怎么决策,而不是只看最后一个 BUY/SELL。**
->
-> *A visual multi-agent LLM trading research workbench. Watch the agents debate, see the causal chain unfold, replay history with one click.*
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![许可证](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Frontend](https://img.shields.io/badge/Frontend-React_%2B_Kumo_%2B_Vite-f48120.svg)](https://kumo-ui.com/)
-[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![前端](https://img.shields.io/badge/%E5%89%8D%E7%AB%AF-React_%2B_Kumo_%2B_Vite-f48120.svg)](https://kumo-ui.com/)
+[![后端](https://img.shields.io/badge/%E5%90%8E%E7%AB%AF-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
-**English** | [简体中文](README.zh-CN.md)
-
-> ⚠️ Research / educational tool only. **Not investment advice.** [Full disclaimer ↓](#disclaimer--完整免责声明)
+> ⚠️ 仅供研究 / 教学用途。**不构成任何投资建议。** [完整免责声明 ↓](#免责声明)
 
 ---
 
-<!-- TODO: Hero screenshot here. Recommended:
-     - Analysis Progress page mid-run (debate bubbles streaming live)
-     - Or a 30s GIF: NL input → parse → analyse → debate → decision card
-     Suggested path: assets/screenshots/hero.png -->
-
-<!-- screenshot:hero -->
+![TradingV 控制台首页](assets/screenshots/dashboard.png)
 
 ---
 
-## ✨ What makes Studio different
+## ✨ Studio 不一样在哪
 
-### 🎯 See the reasoning, not walls of text
+### 🎯 看推理过程,而不是一堵 Markdown 墙
 
-Most LLM trading frameworks dump long Markdown reports and expect you to scroll.
-Studio **parses the same reports** into structured visualisations.
+大多数 LLM 交易框架最终扔给你一堆长 Markdown 报告,让你自己滚动翻。
+Studio **解析同样的报告**,把它们转成结构化可视化。
 
-- **Causal-chain cards** — the event analyst's output becomes per-event cards:
-  `event → direct impact → supply chain → sector sentiment → individual stocks`,
-  rendered as a vertical chain with sentiment-tinted borders.
+- **因果链卡片** — 事件分析师的输出会被拆成一张张事件卡:
+  `事件 → 直接影响 → 供应链 → 板块情绪 → 个股`,
+  以纵向链条渲染,卡片边框按情绪正负染色。
+- **多空双方变成对话** — 不再是两大段长文。
+  左右气泡按轮次分割,标注角色,最新一轮带实时脉冲动画。
+  风险辩论(激进 / 保守 / 中立)用三种颜色同样处理。
+- **流式实时展示** — 进度页通过 WebSocket 订阅 `debate_turn` 事件,
+  图运行的过程中对话**实时生长** —
+  不只是"节点 X 已完成"这种时间线打点。
 
-  ![Causal chain visualisation](assets/screenshots/causal-chain.png)
-- **Bull / Bear as a dialogue** — no more two long blocks of text.
-  Left/right chat bubbles split by round, role-tagged, with a live-pulse on
-  the freshest turn. Risk debate (aggressive / conservative / neutral) gets
-  the same treatment in three colours.
-  <!-- screenshot:debate-bubbles -->
-- **Streamed live** — the progress page subscribes to a `debate_turn` event
-  over WebSocket and grows the dialogue **in real time** as the graph runs —
-  not just "node X completed" timeline ticks.
+### 🇨🇳 A 股一等公民
 
-### 🇨🇳 A-share as a first-class citizen
+从数据层开始就为中国市场而生,同时保留对美股 / 港股 / 全球市场的完整覆盖。
 
-Built for Chinese-market research from the data layer up, while keeping
-full US / HK / global coverage.
-
-- **AKShare** (free, default) + **Tushare Pro** (optional paid fallback) —
-  the vendor router **auto-detects A-share tickers** (`6-digit`, `.SS/.SH/.SZ`,
-  `sh/sz` prefix) and routes them through the CN chain. No config flip.
-- **4 A-share-native analysts**:
-  - `cn_social` — 东方财富股吧 retail discussion (HTTP-only, no credentials)
-    + optional 微博/小红书/抖音 via [MediaCrawler](https://github.com/NanmiCoder/MediaCrawler)
-  - `event` — LLM-reasoned causal chains, no keyword dictionary
+- **AKShare**(免费,默认) + **Tushare Pro**(可选付费兜底) —
+  vendor 路由会**自动识别 A 股代码**(`6 位数字`、`.SS/.SH/.SZ`、
+  `sh/sz` 前缀)并路由到 CN 数据链。无需手工切换。
+- **4 个 A 股原生分析师**:
+  - `cn_social` — 东方财富股吧散户讨论(纯 HTTP,无需鉴权)
+    + 可选 微博/小红书/抖音(通过 [MediaCrawler](https://github.com/NanmiCoder/MediaCrawler))
+  - `event` — LLM 推理因果链,无需关键词词典
   - `capital_flow` — 主力资金净流入 / 北向(沪深港通) / 融资融券 / 龙虎榜
-  - `macro` — top-down regime read (CPI/PPI/M2/PMI/LPR/USDCNY/US 10Y)
-    mapped to sector tilts
-- **Minute-level K-line** for A-share (1/5/15/30/60-min via AKShare),
-  live-refresh every 30–60s during trading hours.
+  - `macro` — 自上而下宏观判断(CPI/PPI/M2/PMI/LPR/USDCNY/美债 10Y)
+    映射到板块倾向
+- **分钟级 K 线** 适配 A 股(1/5/15/30/60 分钟,通过 AKShare),
+  交易时段每 30–60 秒实时刷新。
 
-### 🛠 Complete workflow, not just one-shot inference
+### 🛠 完整工作流,不只是一次推理
 
-Studio bundles the muscles a research workbench actually needs:
+Studio 集成了研究工作台真正需要的肌肉:
 
-| Feature | What it does |
+| 功能 | 干什么用 |
 |---|---|
-| **Natural-language entry** | "研究茅台短期" / "AAPL 30 天" → ticker + date + period auto-filled. Rule-based first (deterministic, free), optional LLM fallback. |
-| **Holdings tracking** | A-share / global positions with shares, cost, real-time quote, P&L, and **latest analysis signal per ticker**. CSV import accepts 代码/股数/成本价 Chinese headers. |
-| **Scheduled analyses** | Interval / daily / weekly background runs. Analyst + LLM config snapshotted at create time. Auto-disable after 3 consecutive failures so a broken setup can't silently burn through your quota. |
-| **Paper trading** | Virtual account, cash, positions, daily NAV snapshots. **One-click "按此决策模拟下单"** parses the trader proposal's Action + Entry/Target/Stop and opens a virtual position. Enforces A-share T+1. |
-| **决策回放回测 (Decision Replay)** | Event-driven backtest replays Studio's stored Agent decisions over any window — answers *"if I'd followed the agents' Buy/Sell calls, what would my net worth look like?"*. **Zero LLM cost** since it replays history. Reports total return, max drawdown, Sharpe, Sortino, win rate, profit factor, alpha vs benchmark. Each trade links back to its source analysis report. |
-| **决策质量看板 (Decision Quality)** | The next step after backtest. Scores **every individual completed analysis** against real N-day price moves (5 / 30 / 60-day horizons), benchmarked against the regional index. Surfaces overall win-rate / avg α / Sharpe, a **confidence-calibration curve** (does "0.8 confidence" actually win 80%?), breakdowns by **ticker / signal / single analyst / analyst combo / LLM model** (so you can answer *"did adding `capital_flow` improve alpha?"*), and a per-day calendar heatmap. Computed on demand — no extra tables, no LLM cost. |
-| **K-line panel** | Per-ticker drawer from Holdings or Paper rows. Daily + 1/5/15/30/60-min bars, MA(5/10/20) + volume overlays, optional entry/target/stop reference lines, fullscreen mode. |
-| **API key & model picker** | Per-provider model catalog (e.g. DeepSeek V4 Pro / V3.2 thinking / …, Claude Opus 4.7 / Sonnet 4.6 / …). API keys editable from Settings → written through to `.env` so the CLI sees the same values. Keys masked in read path, raw never echoed. |
-| **Login & users** | FastAPI-backed login/register, signed bearer tokens, first-user admin bootstrap, local `admin/admin` debug mode, and an admin user-management page. |
-| **Team chat** | Persistent room-based chat (`general`, `trading`, `strategy`, `news`) stored in SQLite and refreshed from the backend for small-team debugging. |
+| **自然语言入口** | "研究茅台短期" / "AAPL 30 天" → 自动填充代码 + 日期 + 周期。默认走规则解析(确定性、免费),可选 LLM 兜底。 |
+| **持仓追踪** | A 股 / 全球持仓,记录股数、成本、实时报价、盈亏,以及**每个标的最新一次分析信号**。CSV 导入兼容 代码/股数/成本价 等中文表头。 |
+| **定时分析** | 间隔 / 每日 / 每周后台运行。分析师与 LLM 配置在创建时快照保留。连续失败 3 次自动停用,坏配置不会悄悄烧光你的额度。 |
+| **模拟交易** | 虚拟账户、现金、持仓、每日 NAV 快照。**一键"按此决策模拟下单"** 会解析 trader proposal 的 Action + Entry/Target/Stop 并开一笔虚拟仓位。强制执行 A 股 T+1。 |
+| **决策回放回测 (Decision Replay)** | 事件驱动的回测,在任意窗口内回放 Studio 已存储的 Agent 决策 —— 回答 *"如果我当时听了 Agent 的 Buy/Sell,现在净值会是多少?"*。**零 LLM 成本**,因为是历史回放。报告总收益、最大回撤、夏普、索提诺、胜率、盈亏比、相对基准的 alpha。每笔交易可回链到对应的源分析报告。 |
+| **K 线面板** | 在持仓页或模拟交易页按标的弹出抽屉。日线 + 1/5/15/30/60 分钟线,MA(5/10/20) + 成交量副图,可叠加入场/目标/止损参考线,支持全屏。 |
+| **API Key 与模型选择** | 每个 provider 自带模型目录(如 DeepSeek V4 Pro / V3.2 thinking / …,Claude Opus 4.7 / Sonnet 4.6 / …)。API Key 可在「设置」中直接编辑 → 写穿到 `.env`,CLI 看到的是同一份。读路径打码,原值永不回显。 |
+| **登录与用户管理** | FastAPI 后端登录/注册、签名 Bearer Token、首个注册用户自动成为管理员、本地 `admin/admin` 调试模式,以及管理员用户管理页。 |
+| **团队聊天室** | 基于房间的持久化聊天(`general`、`trading`、`strategy`、`news`),消息写入 SQLite 并从后端刷新,适合小团队联调。 |
 
-Everything inherited from upstream — the LangGraph workflow, multi-provider LLMs,
-decision log, checkpoint resume — still works as before.
+从上游继承的所有东西 —— LangGraph 工作流、多 provider LLM、决策日志、断点续跑 ——
+全部照常工作。
+
+### 界面截图
+
+![团队聊天室](assets/screenshots/chat.png)
+
+![用户管理](assets/screenshots/users.png)
 
 ---
 
-## 🆚 Why this fork?
+## 🆚 为什么要 fork?
 
-| | Upstream `TradingAgents` | **TradingV** |
+| | 上游 `TradingAgents` | **TradingV** |
 |---|---|---|
-| **Interface** | CLI only | CLI + Web UI |
-| **Market coverage** | US | US + **A-share native** + HK |
-| **Agent output** | Markdown reports | **Structured visualisation** + Markdown |
-| **A-share analysts** | — | `cn_social`, `event`, `capital_flow`, `macro` |
-| **A-share data** | — | AKShare (free) + Tushare Pro (optional) |
-| **Holdings / paper / backtest** | — | ✅ |
-| **Decision-quality dashboard** | — | ✅ (win-rate / alpha / calibration per analyst combo & LLM) |
-| **Scheduled analyses** | — | ✅ |
-| **Auth / users / chat** | — | ✅ |
-| **Natural-language input** | — | ✅ (rule-based + optional LLM) |
-| **LLM providers** | OpenAI / Google / Anthropic | + DeepSeek / 通义 / 智谱 / MiniMax / OpenRouter / Ollama / Azure |
+| **交互界面** | 仅 CLI | CLI + Web UI |
+| **市场覆盖** | 美股 | 美股 + **A 股原生** + 港股 |
+| **Agent 输出** | Markdown 报告 | **结构化可视化** + Markdown |
+| **A 股分析师** | — | `cn_social`、`event`、`capital_flow`、`macro` |
+| **A 股数据源** | — | AKShare(免费) + Tushare Pro(可选) |
+| **持仓 / 模拟交易 / 回测** | — | ✅ |
+| **定时分析** | — | ✅ |
+| **登录 / 用户 / 聊天** | — | ✅ |
+| **自然语言输入** | — | ✅(规则 + 可选 LLM) |
+| **LLM Provider** | OpenAI / Google / Anthropic | + DeepSeek / 通义 / 智谱 / MiniMax / OpenRouter / Ollama / Azure |
 
-> This is an **open-source community fork**, not affiliated with Tauric Research.
-> See [Upstream credits](#upstream-credits) for the original work and citation.
+> 这是一个**开源社区 fork**,与 Tauric Research 无任何官方关联。
+> 原始作品与引用请见 [上游致谢](#上游致谢)。
 
 ---
 
-## 🚀 Quick start
+## 🚀 快速开始
 
-### 1. Install
+### 1. 安装
 
 ```bash
 git clone <your-repo-url> TradingV
 cd TradingV
 
-# Recommended: virtual env
+# 推荐:使用虚拟环境
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 # source .venv/bin/activate     # Linux/macOS
 
-# Install — pick the extras you need:
-pip install -e ".[web,cn]"                    # Web UI + A-share (recommended)
-# pip install -e ".[web]"                     # US-only, skip akshare/tushare
-# pip install -e ".[web,cn,cn-pro,cn-social]" # + Tushare paid + 股吧/微博 sentiment
-# pip install -e ".[all]"                     # everything except dev tooling
-# pip install -e ".[web,cn,dev]"              # contributors (adds pytest)
+# 安装 — 按需选择 extras:
+pip install -e ".[web,cn]"                    # Web UI + A 股(推荐)
+# pip install -e ".[web]"                     # 仅美股,不装 akshare/tushare
+# pip install -e ".[web,cn,cn-pro,cn-social]" # + Tushare 付费 + 股吧/微博 情绪
+# pip install -e ".[all]"                     # 除开发工具外全部安装
+# pip install -e ".[web,cn,dev]"              # 贡献者(包含 pytest)
 ```
 
-### 2. Configure API keys
+### 2. 配置 API Key
 
 ```bash
 cp .env.example .env
-# Edit .env: set at least ONE LLM provider's key.
-# Data-source keys (TUSHARE_TOKEN / ALPHA_VANTAGE_API_KEY) are all optional —
-# the pipeline runs entirely on free sources by default.
+# 编辑 .env:至少配一个 LLM provider 的 Key。
+# 数据源 Key(TUSHARE_TOKEN / ALPHA_VANTAGE_API_KEY)全部可选 ——
+# 默认情况下整条流水线只跑免费数据源。
 ```
 
-You can also manage LLM API keys **from the Web Studio's Settings page** —
-values are written through to `.env` so the CLI sees the same keys.
+也可以**在 Web Studio 的「设置」页里管理 LLM API Key** ——
+值会同步写穿到 `.env`,CLI 看到的是同一份 Key。
 
-### 3. Run
+### 3. 运行
 
-**Web Studio (recommended):**
+**Web Studio(推荐):**
 
 ```bash
-# Local debugging: start both services and create/refresh admin / admin
+# 本地调试:同时启动前后端,并创建/刷新 admin / admin
 scripts/start.sh all --debug-auth
 
-# Or start without the debug account and register the first admin in the UI
+# 或不启用调试账号,在 UI 里注册第一个管理员
 scripts/start.sh all
 
-# Or start them separately
+# 或分别启动
 scripts/start.sh backend   # http://127.0.0.1:8000
 scripts/start.sh frontend  # http://localhost:3000
 ```
 
-`--debug-auth` is for local development only. It creates or refreshes an
-administrator with the default credentials `admin` / `admin`; override them
-with `TRADINGV_DEBUG_AUTH_USER` and `TRADINGV_DEBUG_AUTH_PASSWORD` if needed.
-Without that flag, open `/register` and the first registered account becomes
-an administrator.
+`--debug-auth` 仅用于本地开发调试。它会创建或刷新一个管理员账号,
+默认账号密码是 `admin` / `admin`; 如需修改,可设置
+`TRADINGV_DEBUG_AUTH_USER` 和 `TRADINGV_DEBUG_AUTH_PASSWORD`。不启用该参数时,
+打开 `/register`,第一个注册用户会自动成为管理员。
 
-The active frontend is React + Kumo.
+当前生效的前端是 React + Kumo。
 
-Current Web routes:
+当前 Web 路由:
 
-- Public: `/login`, `/register`, `/forgot-password`.
-- Authenticated: `/`, `/analyze`, `/screener`, `/progress/:id`, `/holdings`,
-  `/schedule`, `/paper`, `/backtest`, `/quality`, `/history`, `/report/:id`,
-  `/chat`, `/users`, `/settings`.
-- Legacy Vue/Naive/Pinia/Vue Router sources and dependencies have been removed.
+- 公开路由:`/login`、`/register`、`/forgot-password`。
+- 登录后路由:`/`、`/analyze`、`/screener`、`/progress/:id`、`/holdings`、
+  `/schedule`、`/paper`、`/backtest`、`/quality`、`/history`、`/report/:id`、
+  `/chat`、`/users`、`/settings`。
+- 旧 Vue/Naive/Pinia/Vue Router 源码与依赖已移除。
 
-For production single-process deployment, build the frontend once and let
-the backend serve the static bundle:
+生产环境单进程部署:前端构建一次,让后端直接托管静态产物:
 
 ```bash
 cd web/frontend && npm run build
 cd ../..
-tradingagents-web              # serves the built UI at http://127.0.0.1:8000/
+tradingagents-web              # 在 http://127.0.0.1:8000/ 上提供已构建好的 UI
 ```
 
 **CLI:**
@@ -186,58 +174,54 @@ tradingagents-web              # serves the built UI at http://127.0.0.1:8000/
 tradingagents
 ```
 
-**Docker (CLI workflow):**
+**Docker(CLI 模式):**
 
 ```bash
 cp .env.example .env
 docker compose run --rm tradingagents
 ```
 
-> The Docker image targets the CLI workflow. To run the Web Studio under
-> Docker, expose port `8000` and build the frontend before container start.
+> Docker 镜像面向 CLI 工作流。若需在 Docker 中跑 Web Studio,
+> 请开放 `8000` 端口,并在启动前先构建好前端。
 
 ---
 
-## 🎬 Try it out — typical flow
+## 🎬 上手试试 — 典型流程
 
-1. Open `http://localhost:3000/` and sign in. For local debugging, use `admin` / `admin` after starting with `--debug-auth`; otherwise register the first admin account.
-2. **Settings** → fill in your `DEEPSEEK_API_KEY` (or any LLM provider's key).
-3. **Users** → add the other local users if you are testing as a small team.
-4. **Chat** → send a message in a room to confirm authenticated multi-user state is working.
-5. **新建分析** → type `研究茅台短期` in the smart-parse box → click 解析并填充 → ticker `600519`, date today, all set.
-6. Pick analyst team — check `Event` for the causal-chain output and `CN Sentiment` for 股吧 — start.
-7. On the **Analysis Progress** page, the right side grows a live debate transcript between Bull and Bear as rounds complete.
-8. Open the completed run from **History** and inspect the **Event impact** tab:
-   per-event cards show event → impact → supply chain → sector → individual
-   stocks instead of a wall of Markdown.
-9. Add the ticker to **持仓追踪** with shares + cost. The Holdings page shows real-time price, P&L, and links to the latest analysis signal.
-10. From **模拟交易** open the K-line drawer for any held ticker — daily + 1/5/15/30/60-min bars with MA(5/10/20), volume, and entry/target/stop overlays from the decision card.
-
-![Paper trading with K-line panel](assets/screenshots/paper-trading-kline.png)
+1. 打开 `http://localhost:3000/` 并登录。本地调试时,先用 `--debug-auth` 启动,然后使用 `admin` / `admin`; 否则先注册第一个管理员账号。
+2. **设置** → 填上 `DEEPSEEK_API_KEY`(或任意一个 LLM provider 的 Key)。
+3. **用户管理** → 如果是多人联调,先添加其他用户。
+4. **聊天室** → 在任意频道发一条消息,确认登录态和多人消息同步正常。
+5. **新建分析** → 在智能解析框里输入 `研究茅台短期` → 点击「解析并填充」 → 代码 `600519`、日期今天,全部自动填好。
+6. 选择分析师团队 —— 勾上 `Event` 看因果链输出,勾上 `CN Sentiment` 看股吧情绪 → 开始。
+7. **分析进度页**右侧会随着每一轮的完成,实时生长出 Bull 和 Bear 之间的辩论记录。
+8. 从**历史记录**打开已完成任务,在**报告详情页**查看「事件影响」Tab ——
+   一张张事件卡片展示 事件 → 影响 → 供应链 → 板块 → 个股,不再是一堵 Markdown 墙。
+9. 在**持仓追踪**里把该标的加入,填上股数和成本。持仓页会显示实时价格、盈亏,以及链回最新一次分析信号的入口。
+10. 在**模拟交易**页对任意持仓打开 K 线抽屉 —— 日线 + 1/5/15/30/60 分钟线,带 MA(5/10/20)、成交量副图,以及从决策卡同步过来的入场/目标/止损参考线。
 
 ---
 
-## 💰 Cost & speed estimates
+## 💰 成本与速度参考
 
-A single complete analysis (4 analysts + 1 debate round, ~5–10K input tokens
-+ ~3–5K output tokens) typically costs and takes:
+完整一次分析(4 个分析师 + 1 轮辩论,约 5–10K 输入 token + 3–5K 输出 token)
+典型成本与耗时:
 
-| LLM | Single-run cost | Time | Notes |
+| LLM | 单次成本 | 耗时 | 备注 |
 |---|---|---|---|
-| **DeepSeek V4 Pro** | ~¥0.05 | ~45s | Best price/quality for CN |
-| **Qwen Plus** (DashScope) | ~¥0.10 | ~50s | Strong CN context, A-share-savvy |
-| **GLM-4.6** | ~¥0.15 | ~40s | Decent reasoning, lower cost |
-| **Claude Sonnet 4.6** | ~$0.20 | ~40s | Strongest structured output |
-| **GPT-5.4** | ~$0.30 | ~30s | Fastest among premium |
-| **Ollama (local)** | Free | varies | Quality depends on model + hardware |
+| **DeepSeek V4 Pro** | ~¥0.05 | ~45s | CN 性价比最佳 |
+| **Qwen Plus** (DashScope) | ~¥0.10 | ~50s | 中文上下文强,熟悉 A 股 |
+| **GLM-4.6** | ~¥0.15 | ~40s | 推理可用,成本偏低 |
+| **Claude Sonnet 4.6** | ~$0.20 | ~40s | 结构化输出最稳 |
+| **GPT-5.4** | ~$0.30 | ~30s | 高端档里最快 |
+| **Ollama(本地)** | 免费 | 视情况 | 质量取决于模型与硬件 |
 
-> Numbers are rough estimates from typical Studio runs; your usage will vary
-> with analyst count, debate rounds, and report length. **All Studio data
-> sources are free** — paid keys (Tushare, Alpha Vantage) are optional.
+> 数字是 Studio 典型运行的粗略估算;实际成本会随分析师数量、辩论轮数、报告长度变化。
+> **Studio 所有数据源都是免费的** —— 付费 Key(Tushare、Alpha Vantage)可选。
 
 ---
 
-## 🏛 Architecture
+## 🏛 架构
 
 ```
                  ┌────────────────────────────────────────────────────────┐
@@ -260,20 +244,20 @@ A single complete analysis (4 analysts + 1 debate round, ~5–10K input tokens
                  │   Web Studio                                            │
                  │   FastAPI ◄─► SQLite  │  React + Kumo frontend         │
                  │                                                        │
-                 │   ▸ Natural-language analyze entry                     │
-                 │   ▸ Causal-chain + debate-bubble visualisation         │
-                 │   ▸ Holdings tracking (real-time quote, latest signal) │
-                 │   ▸ Scheduled analyses (interval / daily / weekly)     │
-                 │   ▸ Paper trading (from-decision orders, NAV curve)    │
-                 │   ▸ K-line panel (daily + 1/5/15/30/60-min, live)      │
-                 │   ▸ Decision Replay backtest                           │
-                 │   ▸ API-key + model-catalog management                 │
+                 │   ▸ 自然语言分析入口                                    │
+                 │   ▸ 因果链 + 辩论气泡可视化                             │
+                 │   ▸ 持仓追踪(实时报价、最新信号)                      │
+                 │   ▸ 定时分析(间隔 / 每日 / 每周)                      │
+                 │   ▸ 模拟交易(按决策下单、NAV 曲线)                    │
+                 │   ▸ K 线面板(日线 + 1/5/15/30/60 分钟,实时)          │
+                 │   ▸ 决策回放回测                                        │
+                 │   ▸ API Key + 模型目录管理                              │
                  └────────────────────────────────────────────────────────┘
                                           ▲
-                                          │  vendor router auto-routes A-share
+                                          │  vendor 路由自动识别 A 股
                                           │  → akshare → tushare → yfinance
                  ┌────────────────────────────────────────────────────────┐
-                 │   Data sources                                          │
+                 │   数据源                                                │
                  │   AKShare  · Tushare · yfinance · Alpha Vantage         │
                  │   东方财富股吧 · Reddit · StockTwits · MediaCrawler    │
                  └────────────────────────────────────────────────────────┘
@@ -281,36 +265,35 @@ A single complete analysis (4 analysts + 1 debate round, ~5–10K input tokens
 
 ---
 
-## 📡 Data sources
+## 📡 数据源
 
-The Studio routes data requests through `tradingagents/dataflows/interface.py:route_to_vendor`,
-which auto-detects A-share tickers and falls back across vendors on failure.
+Studio 通过 `tradingagents/dataflows/interface.py:route_to_vendor` 路由数据请求,
+该函数会自动识别 A 股代码,并在失败时按顺序在多个 vendor 之间兜底。
 
-### Stock prices / fundamentals / news
+### 行情 / 基本面 / 新闻
 
-| Source | Coverage | Cost | Setup |
+| 数据源 | 覆盖范围 | 成本 | 配置 |
 |---|---|---|---|
-| **AKShare** | A-share OHLCV / fundamentals / news | Free | No key needed (default for A-share) |
-| **Tushare Pro** | A-share OHLCV / fundamentals | Free tier (rate-limited) + paid | Set `TUSHARE_TOKEN` |
-| **yfinance** | US / HK / TYO / global | Free | No key needed |
-| **Alpha Vantage** | US prices / fundamentals / news / insider | 25 req/day free, paid above | Set `ALPHA_VANTAGE_API_KEY` (optional) |
+| **AKShare** | A 股 OHLCV / 基本面 / 新闻 | 免费 | 无需 Key(A 股默认) |
+| **Tushare Pro** | A 股 OHLCV / 基本面 | 免费档(有限流) + 付费 | 设置 `TUSHARE_TOKEN` |
+| **yfinance** | 美股 / 港股 / 东京 / 全球 | 免费 | 无需 Key |
+| **Alpha Vantage** | 美股 价格 / 基本面 / 新闻 / 内部人 | 25 次/日免费,付费可加量 | 设置 `ALPHA_VANTAGE_API_KEY`(可选) |
 
-### Sentiment
+### 情绪数据
 
-| Source | Coverage | Cost | Setup |
+| 数据源 | 覆盖范围 | 成本 | 配置 |
 |---|---|---|---|
-| **东方财富股吧** | A-share retail discussion | Free | HTTP-only |
-| **MediaCrawler** | 微博 / 小红书 / 抖音 | Free (self-host) | Optional — needs MySQL + [MediaCrawler](https://github.com/NanmiCoder/MediaCrawler) running separately |
-| **Reddit** | US tickers, r/wallstreetbets etc. | Free | — |
-| **StockTwits** | US trader community | Free | — |
+| **东方财富股吧** | A 股散户讨论 | 免费 | 纯 HTTP |
+| **MediaCrawler** | 微博 / 小红书 / 抖音 | 免费(自托管) | 可选 —— 需要单独跑 [MediaCrawler](https://github.com/NanmiCoder/MediaCrawler) + MySQL |
+| **Reddit** | 美股代码、r/wallstreetbets 等 | 免费 | — |
+| **StockTwits** | 美股交易员社区 | 免费 | — |
 
-> **You can run the entire pipeline with only free sources.** Tushare and
-> Alpha Vantage keys are optional; if not configured the vendor router
-> simply skips them.
+> **整条流水线可以只用免费数据源跑完。** Tushare 与 Alpha Vantage 的 Key 都是可选的;
+> 没配置时 vendor 路由会自动跳过它们。
 
 ---
 
-## 🐍 Programmatic usage
+## 🐍 Python 编程使用
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
@@ -326,80 +309,79 @@ ta = TradingAgentsGraph(
     selected_analysts=["market", "cn_social", "event", "news", "fundamentals"],
     config=config,
 )
-_, decision = ta.propagate("贵州茅台", "2026-01-15")  # or "600519"
+_, decision = ta.propagate("贵州茅台", "2026-01-15")  # 或 "600519"
 print(decision)
 ```
 
-A-share tickers are auto-routed through AKShare → Tushare → yfinance regardless
-of the global `data_vendors` setting. See [`tradingagents/default_config.py`](tradingagents/default_config.py)
-for the `cn_data_vendors` chain.
+无论全局 `data_vendors` 怎么配,A 股代码都会自动按
+AKShare → Tushare → yfinance 的顺序路由。具体 chain 见
+[`tradingagents/default_config.py`](tradingagents/default_config.py) 中的 `cn_data_vendors`。
 
-See [`examples/quickstart.py`](examples/quickstart.py) for a minimal runnable.
-
----
-
-## 💾 Persistence & recovery
-
-### Decision log
-
-Always on. Each completed run appends its decision to `~/.tradingagents/memory/trading_memory.md`.
-On the next run for the same ticker, the framework injects the most recent
-decisions and realised-return reflections into the Portfolio Manager prompt.
-Override the path with `TRADINGAGENTS_MEMORY_LOG_PATH`.
-
-### Checkpoint resume
-
-Opt-in via `--checkpoint`. LangGraph saves state after each node so a crashed
-run resumes from the last successful step. Per-ticker SQLite databases live
-at `~/.tradingagents/cache/checkpoints/<TICKER>.db`.
-
-### Web state
-
-The Web Studio's SQLite (runs, holdings, schedules, paper account, backtests)
-lives at `~/.tradingagents/web_state.db`. Override with `TRADINGAGENTS_WEB_DB`.
-**It is recreated automatically on startup if missing** — deleting it just
-gives you a clean slate. API keys live in `.env`, not in this database.
+可运行的最小示例见 [`examples/quickstart.py`](examples/quickstart.py)。
 
 ---
 
-## 🧰 Tech stack
+## 💾 持久化与恢复
 
-**Core (Python):** Python 3.10+ · LangChain + LangGraph · Pydantic · AKShare / Tushare / yfinance / Alpha Vantage · beautifulsoup4 + lxml (股吧 HTML) · pymysql (MediaCrawler, optional) · stockstats · backtrader · Rich + Typer
+### 决策日志
 
-**Web backend:** FastAPI + Uvicorn · WebSockets · SQLite
+始终开启。每次完整运行结束都会把决策追加到 `~/.tradingagents/memory/trading_memory.md`。
+下一次跑同一标的时,框架会把最近的几条决策与已实现收益反思
+注入到 Portfolio Manager 的 prompt 中。
+路径可通过 `TRADINGAGENTS_MEMORY_LOG_PATH` 覆盖。
 
-**Web frontend:** React + TypeScript + Vite · Kumo UI (`@cloudflare/kumo`, registry: `https://kumo-ui.com/api/component-registry`) · React Router · klinecharts · marked · axios
+### 断点续跑
 
-**LLM providers:** OpenAI · Google Gemini · Anthropic Claude · xAI Grok · DeepSeek · Qwen (DashScope intl + CN) · GLM (Z.AI + BigModel) · MiniMax (global + CN) · OpenRouter · Ollama · Azure OpenAI
+通过 `--checkpoint` 开启。LangGraph 在每个节点结束后保存状态,
+崩溃的运行可从最后一个成功步骤恢复。每个标的的 SQLite 数据库
+位于 `~/.tradingagents/cache/checkpoints/<TICKER>.db`。
 
----
+### Web 状态
 
-## 🗺 Roadmap
-
-- [ ] **Phase 2 Backtest** — live Agent inference replay (re-call the LLM per bar) for true forward-looking backtests
-- [ ] Futures (期货) and HK market data adapters
-- [ ] Multi-account paper trading
-- [ ] Decision-card → real broker sandbox API bridge
-- [ ] Responsive / mobile-friendly UI
-- [ ] GitHub Actions CI (`pytest -m unit` on PR)
-- [ ] Public Discussions / Issue templates
-
-Have a suggestion? Open an issue or start a Discussion — feedback shapes the roadmap.
+Web Studio 的 SQLite(runs、holdings、schedules、paper account、backtests)
+位于 `~/.tradingagents/web_state.db`,可通过 `TRADINGAGENTS_WEB_DB` 覆盖。
+**启动时若文件不存在会自动重建** —— 删掉它就等于清空状态。
+API Key 存在 `.env`,**不**存在这个数据库里。
 
 ---
 
-## 🤝 Contributing
+## 🧰 技术栈
 
-Issues / PRs welcome. Before submitting a PR:
+**核心(Python):** Python 3.10+ · LangChain + LangGraph · Pydantic · AKShare / Tushare / yfinance / Alpha Vantage · beautifulsoup4 + lxml(股吧 HTML) · pymysql(MediaCrawler,可选) · stockstats · backtrader · Rich + Typer
 
-1. Run unit tests: `pytest -m unit`
-2. If you change LangGraph orchestration or schema, update `CHANGELOG.md`'s
-   `[Unreleased]` section
-3. If you modify a file inherited from upstream, add a `"Modified by"`
-   notice (Apache 2.0 §4(b) — see existing files for the format)
+**Web 后端:** FastAPI + Uvicorn · WebSockets · SQLite
 
-For end-to-end verification against a real LLM provider (new provider
-adapters, structured-output changes), use:
+**Web 前端:** React + TypeScript + Vite · Kumo UI(`@cloudflare/kumo`, registry: `https://kumo-ui.com/api/component-registry`) · React Router · klinecharts · marked · axios
+
+**LLM Provider:** OpenAI · Google Gemini · Anthropic Claude · xAI Grok · DeepSeek · Qwen(DashScope 国际版 + 国内版) · GLM(Z.AI + BigModel) · MiniMax(全球 + 国内) · OpenRouter · Ollama · Azure OpenAI
+
+---
+
+## 🗺 路线图
+
+- [ ] **Phase 2 回测** — 实时 Agent 推理回放(每根 K 线重新调 LLM),做真正前向的回测
+- [ ] 期货与港股市场数据适配
+- [ ] 多账户模拟交易
+- [ ] 决策卡片 → 真实券商沙盒 API 桥接
+- [ ] 响应式 / 移动端友好 UI
+- [ ] GitHub Actions CI(PR 时跑 `pytest -m unit`)
+- [ ] 公开的 Discussions / Issue 模板
+
+有建议?欢迎提 Issue 或开 Discussion —— 反馈会影响路线图走向。
+
+---
+
+## 🤝 贡献
+
+欢迎 Issues / PRs。提交 PR 之前请:
+
+1. 跑单元测试:`pytest -m unit`
+2. 如果改动了 LangGraph 编排或数据 schema,请更新 `CHANGELOG.md` 的
+   `[Unreleased]` 段落
+3. 如果改动了从上游继承的文件,请加上 `"Modified by"` 标记
+   (Apache 2.0 §4(b) —— 参考现有文件的格式)
+
+对接真实 LLM provider 的端到端验证(新 provider 适配器、结构化输出改动),请用:
 
 ```bash
 DEEPSEEK_API_KEY=... python scripts/smoke_structured_output.py deepseek
@@ -407,118 +389,116 @@ DEEPSEEK_API_KEY=... python scripts/smoke_structured_output.py deepseek
 
 ---
 
-## 🌐 Community
+## 🌐 社区
 
-This project is shared and discussed on the following community:
+感谢以下社区对本项目的关注与支持：
 
-- [LINUX DO](https://linux.do/) — a real tech community.
+- [LINUX DO](https://linux.do/) — 一个真正的技术社区,本项目在此分享与讨论。
 
-Feedback, issues, and suggestions are welcome there.
+欢迎在对应社区中提出 issue、反馈与建议。
 
 ---
 
-## 📁 Project layout
+## 📁 项目结构
 
 ```
-tradingagents/                  # core agent framework (inherited + extended)
+tradingagents/                  # 核心 Agent 框架(继承自上游 + 扩展)
 ├── agents/
 │   ├── analysts/               # + cn_sentiment_analyst.py, event_analyst.py
 │   │                           # + capital_flow_analyst.py, macro_analyst.py
-│   ├── researchers/            # bull / bear (extended for CN reports)
+│   ├── researchers/            # bull / bear(扩展支持 CN 报告)
 │   ├── managers/               # research manager, portfolio manager
 │   ├── trader/
 │   └── risk_mgmt/
-├── backtesting/                # Studio — event-driven backtest engine
+├── backtesting/                # Studio — 事件驱动回测引擎
 │   ├── engine.py
 │   ├── portfolio.py
 │   ├── metrics.py
 │   ├── slippage.py
-│   └── signals/                # signal sources (memory_log, future: rule / live_agent)
-├── dataflows/                  # data-fetching layer
-│   ├── _proxy.py               # Studio — NO_PROXY bootstrap for CN data domains
-│   ├── akshare_stock.py        # Studio — A-share market data
-│   ├── tushare_stock.py        # Studio — A-share paid-grade fallback
-│   ├── cn_sentiment.py         # Studio — A-share sentiment aggregator
-│   ├── eastmoney_guba.py       # Studio — 东方财富股吧 client
-│   ├── mediacrawler_wrapper.py # Studio — MySQL wrapper for MediaCrawler
-│   ├── event_intelligence.py   # Studio — event/causal-chain helpers
+│   └── signals/                # 信号源(memory_log,未来:rule / live_agent)
+├── dataflows/                  # 数据获取层
+│   ├── _proxy.py               # Studio — 为 CN 域名做 NO_PROXY bootstrap
+│   ├── akshare_stock.py        # Studio — A 股行情数据
+│   ├── tushare_stock.py        # Studio — A 股付费级兜底
+│   ├── cn_sentiment.py         # Studio — A 股情绪聚合
+│   ├── eastmoney_guba.py       # Studio — 东方财富股吧客户端
+│   ├── mediacrawler_wrapper.py # Studio — MediaCrawler 的 MySQL 适配层
+│   ├── event_intelligence.py   # Studio — 事件 / 因果链工具
 │   ├── capital_flow.py         # Studio — 主力资金 / 北向 / 龙虎榜 / 两融
 │   ├── macro.py                # Studio — CPI/PPI/M2/PMI/LPR/USDCNY/10Y
 │   └── ...
-├── graph/                      # LangGraph orchestration
-├── llm_clients/                # multi-provider LLM factory
+├── graph/                      # LangGraph 编排
+├── llm_clients/                # 多 provider LLM 工厂
 └── utils/
-    └── nl_query_parser.py      # Studio — "研究茅台短期" parser
+    └── nl_query_parser.py      # Studio — "研究茅台短期" 解析器
 
 web/                            # Web Studio
 ├── backend/                    # FastAPI + SQLite + WebSocket
 │   ├── main.py
 │   ├── database.py             # runs · events · reports · holdings ·
 │   │                           # schedules · paper_accounts/positions/orders/nav
-│   ├── graph_runner.py         # emits agent_complete + debate_turn events
-│   ├── scheduler.py            # Studio — recurring-analysis asyncio loop
+│   ├── graph_runner.py         # 发出 agent_complete + debate_turn 事件
+│   ├── scheduler.py            # Studio — 定时分析的 asyncio 循环
 │   └── routers/
-│       ├── analyze.py          # incl. POST /api/parse-query
+│       ├── analyze.py          # 含 POST /api/parse-query
 │       ├── history.py
 │       ├── dashboard.py
-│       ├── holdings.py         # holdings CRUD + CSV import + quote
-│       ├── schedule.py         # Studio — schedule CRUD + trigger + bulk-from-holdings
-│       ├── paper.py            # Studio — paper trading
-│       ├── quote.py            # Studio — K-line OHLC (daily + intraday)
-│       ├── backtest.py         # Studio — backtest runs / curve / trades
-│       └── settings.py         # incl. /api/api-keys + /api/model-catalog
+│       ├── holdings.py         # 持仓 CRUD + CSV 导入 + 实时报价
+│       ├── schedule.py         # Studio — schedule CRUD + 立即触发 + 从持仓批量创建
+│       ├── paper.py            # Studio — 模拟交易
+│       ├── quote.py            # Studio — K 线 OHLC(日线 + 分钟线)
+│       ├── backtest.py         # Studio — 回测运行 / 曲线 / 成交
+│       └── settings.py         # 含 /api/api-keys + /api/model-catalog
 └── frontend/                   # React + Kumo + Vite
     └── src/
-        ├── react/                    # active Kumo app
+        ├── react/                    # 当前生效的 Kumo 应用
         │   ├── components/
         │   ├── pages/                # Dashboard · Analyze · Progress ·
         │   │                         # Screener · Holdings · Schedule ·
         │   │                         # Paper · Backtest · Quality ·
         │   │                         # History · ReportDetail · Settings
         │   └── lib/
-        ├── i18n/locales/             # shared locale dictionaries
+        ├── i18n/locales/             # 共享文案字典
         ├── main.kumo.tsx
         └── api.ts
 
-cli/                            # Typer-based CLI (inherited)
-examples/                       # Minimal Python entry-point examples
-scripts/                        # Real-LLM smoke tests (manual, costs $$$)
-tests/                          # 22 files, 248 test cases
+cli/                            # 基于 Typer 的 CLI(继承自上游)
+examples/                       # 最小可运行 Python 入口示例
+scripts/                        # 真实 LLM 的烟雾测试(手动,会产生费用)
+tests/                          # 22 个文件,248 个测试用例
 ```
 
 ---
 
-## ⭐ Show your support
+## ⭐ 支持一下
 
-If Studio is useful to your research, **star this repo** — it helps others
-find it and motivates continued development.
+如果 Studio 对你的研究有帮助,**给这个仓库点个 Star** —— 既能帮其他人找到它,
+也能持续推动后续开发。
 
-<!-- Optional: WeChat group QR. Drop the image at assets/screenshots/wechat.png:
+<!-- 可选:微信群二维码。把图片放到 assets/screenshots/wechat.png:
 <p align="center">
-  <img src="assets/screenshots/wechat.png" width="200" alt="WeChat group">
+  <img src="assets/screenshots/wechat.png" width="200" alt="微信群">
 </p>
 -->
 
 ---
 
-## 📜 License
+## 📜 许可证
 
-Licensed under the **Apache License 2.0**, identical to the upstream project.
-See [`LICENSE`](LICENSE).
+采用 **Apache License 2.0** 协议,与上游项目一致。详见 [`LICENSE`](LICENSE)。
 
-Per Apache 2.0 §4(b), source files modified relative to upstream carry a
-"Modified by" notice. New files added by this fork carry their own copyright
-notice and remain under Apache 2.0.
+按 Apache 2.0 §4(b) 要求,相对上游有修改的源文件都带有 "Modified by" 标记。
+本 fork 新增的文件保留自己的版权声明,同样以 Apache 2.0 发布。
 
 ---
 
-## Upstream credits
+## 上游致谢
 
-This project is derivative work based on the open-source framework
-**TradingAgents** by Tauric Research. Please support and cite the original work:
+本项目基于开源框架 **TradingAgents**(作者 Tauric Research)派生而来。
+请支持并引用原作:
 
-- Upstream repository: [github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
-- Paper: Xiao, Y., Sun, E., Luo, D., & Wang, W. (2025). *TradingAgents: Multi-Agents LLM Financial Trading Framework*. [arXiv:2412.20138](https://arxiv.org/abs/2412.20138)
+- 上游仓库:[github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
+- 论文:Xiao, Y., Sun, E., Luo, D., & Wang, W. (2025). *TradingAgents: Multi-Agents LLM Financial Trading Framework*. [arXiv:2412.20138](https://arxiv.org/abs/2412.20138)
 
 ```bibtex
 @misc{xiao2025tradingagentsmultiagentsllmfinancial,
@@ -532,41 +512,19 @@ This project is derivative work based on the open-source framework
 }
 ```
 
-> This project is **not affiliated with, endorsed by, or sponsored by Tauric Research**.
-> "TradingAgents" is the upstream project name; this fork is published under
-> a derivative name to avoid confusion. All trademark rights to the original
-> project name belong to their respective owners.
+> 本项目**不附属于、不被认可于、也不被赞助于 Tauric Research**。
+> "TradingAgents" 是上游项目名称;本 fork 以派生名称发布,以避免混淆。
+> 原始项目名称的所有商标权利归各自所有人所有。
 >
-> Third-party libraries used by this fork retain their respective licenses.
-> The MediaCrawler integration calls a separately-installed external project;
-> please review and comply with the licensing and terms-of-service of any
-> data source you crawl.
+> 本 fork 使用的第三方库各自保留其原本的 license。
+> MediaCrawler 集成调用的是单独安装的外部项目;
+> 抓取任何数据源前请先审阅并遵守其授权条款与服务条款。
 
-Changes from upstream are documented in [`CHANGELOG.md`](CHANGELOG.md).
+相对上游的变更记录见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 
-## Disclaimer / 完整免责声明
-
-### English
-
-TradingV is intended for **research, education, and personal
-experimentation only**. It is **NOT** financial, investment, or trading advice.
-
-- The project does **not recommend any stock or security**. The outputs of
-  LLM-based agents — including any "Buy / Sell / Hold" signal, target price,
-  stop-loss level, or confidence score — are the product of multi-agent
-  algorithmic debate, **not** an investment opinion of the authors,
-  contributors, or any institution.
-- LLM outputs may be inaccurate, incomplete, biased, or otherwise misleading.
-  **Markets involve substantial risk of loss.**
-- You are **solely responsible** for any decisions made using this software,
-  and for any resulting financial outcome.
-- This project must **not** be used to provide investment advisory services,
-  stock recommendations, or asset management to the public, whether for free
-  or for a fee.
-
-### 中文
+## 免责声明
 
 TradingV 仅供 **研究、教育、个人学习与技术演示** 使用,
 **不构成任何形式的投资、财务或交易建议**。

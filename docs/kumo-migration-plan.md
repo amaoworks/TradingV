@@ -215,7 +215,7 @@ Checked on 2026-06-08:
 
 ## Documentation Requirements
 
-- Keep `README.md`, `README.zh-CN.md`, `web/frontend/README.md`, and this plan aligned with the active Kumo route state.
+- Keep `README.md`, `web/frontend/README.md`, and this plan aligned with the active Kumo route state.
 - Public README workflow steps must not promise a Kumo page that is still a placeholder.
 - When a route is migrated, update the route parity tracker before or in the same change as the implementation.
 - Do not document Vue, Naive UI, Pinia, or Vue Router as active frontend dependencies.
