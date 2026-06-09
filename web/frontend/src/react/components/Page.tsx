@@ -1,4 +1,5 @@
 import { Banner, Button, Empty, LayerCard, Table } from '@cloudflare/kumo'
+import { FolderSimpleDashed } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 
@@ -57,8 +58,10 @@ export function LoadingEmpty({ loading, title }: { loading: boolean; title: stri
   return (
     <Empty
       size="sm"
+      icon={loading ? undefined : <FolderSimpleDashed size={24} />}
       title={loading ? t('common.saving') : title}
       description={loading ? undefined : ''}
+      className="kumo-empty-dashed"
     />
   )
 }

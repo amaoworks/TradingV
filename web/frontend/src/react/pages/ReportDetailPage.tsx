@@ -9,7 +9,7 @@ import {
   Table,
   Tabs,
 } from '@cloudflare/kumo'
-import { Check, DownloadSimple, Plus, RocketLaunch, X } from '@phosphor-icons/react'
+import { Check, DownloadSimple, FolderSimpleDashed, Plus, RocketLaunch, X } from '@phosphor-icons/react'
 import { marked } from 'marked'
 import { useCallback, useMemo, useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -241,7 +241,12 @@ export function ReportDetailPage() {
             </div>
           </>
         ) : (
-          <Empty size="sm" title={loading ? t('common.saving') : t('report.noReports')} />
+          <Empty
+            size="sm"
+            icon={loading ? undefined : <FolderSimpleDashed size={24} />}
+            title={loading ? t('common.saving') : t('report.noReports')}
+            className="kumo-empty-dashed"
+          />
         )}
       </SectionCard>
 
@@ -394,7 +399,16 @@ function EventReport({ content }: { content: string }) {
   const { t } = useI18n()
   const parsed = useMemo(() => parseEventReport(content), [content])
 
-  if (!content) return <Empty size="sm" title={t('event.empty')} />
+  if (!content) {
+    return (
+      <Empty
+        size="sm"
+        icon={<FolderSimpleDashed size={24} />}
+        title={t('event.empty')}
+        className="kumo-empty-dashed"
+      />
+    )
+  }
 
   return (
     <div className="event-report">

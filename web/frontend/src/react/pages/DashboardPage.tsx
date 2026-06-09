@@ -1,5 +1,5 @@
 import { Badge, Button, Empty } from '@cloudflare/kumo'
-import { ArrowRight, Plus } from '@phosphor-icons/react'
+import { ArrowRight, FolderSimpleDashed, Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../lib/api'
@@ -94,7 +94,13 @@ export function DashboardPage() {
             ))}
           </div>
         ) : (
-          <Empty title={t('dashboard.noRecent')} description={loading ? t('common.saving') : undefined} />
+          <Empty
+            size="sm"
+            icon={loading ? undefined : <FolderSimpleDashed size={24} />}
+            title={t('dashboard.noRecent')}
+            description={loading ? t('common.saving') : undefined}
+            className="kumo-empty-dashed"
+          />
         )}
       </SectionCard>
     </div>

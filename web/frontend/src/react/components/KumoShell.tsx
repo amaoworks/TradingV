@@ -12,16 +12,16 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  Tooltip,
   TooltipProvider,
   useSidebar,
 } from '@cloudflare/kumo'
 import {
-  CaretLeft,
-  CaretRight,
   List,
   MagnifyingGlass,
   Moon,
   RocketLaunch,
+  SignOut,
   Sun,
   TrendUp,
 } from '@phosphor-icons/react'
@@ -35,6 +35,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
+import { useAuth } from './AuthProvider'
 import { appRoutes } from '../lib/routes'
 
 const RouterLink = forwardRef<
@@ -50,6 +51,7 @@ const RouterLink = forwardRef<
 
 export function KumoShell() {
   const { t, locale, setLocale } = useI18n()
+  const { logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [dark, setDark] = useState(() => {
@@ -82,7 +84,7 @@ export function KumoShell() {
   return (
     <TooltipProvider>
       <LinkProvider component={RouterLink}>
-        <SidebarProvider>
+        <SidebarProvider resizable={true} defaultWidth={256} minWidth={180} maxWidth={380}>
           <div className="kumo-app">
             <Sidebar className="kumo-sidebar">
               <SidebarHeader>
@@ -100,22 +102,16 @@ export function KumoShell() {
                   <SidebarGroupLabel>{t('app.workspace')}</SidebarGroupLabel>
                   <SidebarMenu>
                     {appRoutes.map((route) => {
-                      const Icon = route.icon
                       const isActive =
                         location.pathname === route.path ||
                         (route.path === '/history' && location.pathname.startsWith('/report/')) ||
                         (route.path === '/analyze' && location.pathname.startsWith('/progress/'))
                       return (
-                        <SidebarMenuItem key={route.key}>
-                          <SidebarMenuButton
-                            href={route.path}
-                            active={isActive}
-                            icon={Icon}
-                            tooltip={t(route.titleKey)}
-                          >
-                            {t(route.titleKey)}
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        <ShellMenuItem
+                          key={route.key}
+                          route={route}
+                          isActive={isActive}
+                        />
                       )
                     })}
                   </SidebarMenu>
@@ -149,8 +145,16 @@ export function KumoShell() {
                       <TrendUp size={16} weight="bold" />
                     </span>
                   </ShellButton>
+                  <ShellButton
+                    aria-label={t('login.logout')}
+                    title={t('login.logout')}
+                    onClick={() => { logout(); navigate('/login', { replace: true }); }}
+                  >
+                    <SignOut size={16} />
+                  </ShellButton>
                 </div>
               </SidebarFooter>
+              <Sidebar.ResizeHandle />
             </Sidebar>
 
             <div className="kumo-main">
@@ -192,9 +196,40 @@ function ShellSidebarTrigger() {
   const label = open ? t('app.collapseSidebar') : t('app.expandSidebar')
 
   return (
-    <SidebarTrigger className="kumo-shell-button" aria-label={label} title={label}>
-      {open ? <CaretLeft size={16} /> : <CaretRight size={16} />}
-    </SidebarTrigger>
+    <SidebarTrigger className="kumo-shell-button" aria-label={label} title={label} />
+  )
+}
+
+function ShellMenuItem({
+  route,
+  isActive,
+}: {
+  route: typeof appRoutes[number]
+  isActive: boolean
+}) {
+  const { t } = useI18n()
+  const Icon = route.icon
+
+  const button = (
+    <SidebarMenuButton
+      href={route.path}
+      active={isActive}
+      icon={Icon}
+    >
+      {t(route.titleKey)}
+    </SidebarMenuButton>
+  )
+
+  return (
+    <SidebarMenuItem>
+      <Tooltip
+        content={t(route.titleKey)}
+        side="right"
+        render={<div className="w-full flex" />}
+      >
+        {button}
+      </Tooltip>
+    </SidebarMenuItem>
   )
 }
 

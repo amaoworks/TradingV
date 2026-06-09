@@ -1,4 +1,5 @@
 import { Badge, Empty } from '@cloudflare/kumo'
+import { FolderSimpleDashed } from '@phosphor-icons/react'
 import { marked } from 'marked'
 import { useMemo } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
@@ -22,9 +23,9 @@ const rolePrefixes: { prefix: RegExp; role: DebateRole }[] = [
 
 export function DebateThread({
   turns,
-  history = '',
-  bullHistory = '',
-  bearHistory = '',
+  history,
+  bullHistory,
+  bearHistory,
   emptyText,
 }: {
   turns?: DebateTurn[]
@@ -36,13 +37,20 @@ export function DebateThread({
   const { t } = useI18n()
   const resolvedTurns = useMemo(() => {
     if (turns?.length) return turns
-    if (history) return parseCombined(history)
-    if (bullHistory || bearHistory) return interleaveBullBear(bullHistory, bearHistory)
+    if (history) return parseCombined(history || '')
+    if (bullHistory || bearHistory) return interleaveBullBear(bullHistory || '', bearHistory || '')
     return []
   }, [bearHistory, bullHistory, history, turns])
 
   if (!resolvedTurns.length) {
-    return <Empty size="sm" title={emptyText || t('debate.empty')} />
+    return (
+      <Empty
+        size="sm"
+        icon={<FolderSimpleDashed size={24} />}
+        title={emptyText || t('debate.empty')}
+        className="kumo-empty-dashed"
+      />
+    )
   }
 
   return (

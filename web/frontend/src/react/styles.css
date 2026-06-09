@@ -101,6 +101,7 @@ body {
   gap: 4px;
   padding: 8px 6px;
   min-width: 0;
+  width: 100%;
 }
 
 .kumo-shell-button {
@@ -183,6 +184,9 @@ body {
 }
 
 .kumo-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   height: 64px;
   align-items: center;
@@ -289,6 +293,8 @@ body {
 .kumo-card {
   padding: 0;
   overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
 .kumo-card-header {
@@ -296,8 +302,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
-  padding: 16px 18px;
+  padding: 18px 18px 8px;
 }
 
 .kumo-card-header h2,
@@ -317,6 +322,19 @@ body {
 .kumo-list {
   display: flex;
   flex-direction: column;
+  background: var(--kumo-color-base, #fff);
+}
+
+.kumo-card > .kumo-list:first-child,
+.kumo-card > .kumo-table-wrap:first-child {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.kumo-card > .kumo-list:last-child,
+.kumo-card > .kumo-table-wrap:last-child {
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
 }
 
 .kumo-list-item {
@@ -477,6 +495,13 @@ body {
 .kumo-table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--kumo-color-base, #fff);
+}
+
+.kumo-table-wrap table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .kumo-table-wrap td,
@@ -494,7 +519,6 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid var(--kumo-color-hairline, #e1e7ef);
   padding: 12px 18px;
   color: var(--kumo-color-subtle, #6b7280);
 }
@@ -1505,4 +1529,614 @@ body {
 .kumo-sidebar-menu-button[data-active="true"]::after,
 .kumo-sidebar-menu-button[data-active="true"]::before {
   display: none !important;
+}
+
+/* Hide text container inside menu button when sidebar is collapsed to force width shrinkage and correct tooltip offset */
+[data-sidebar="sidebar"][data-state="collapsed"] [data-sidebar="menu-button"] > div > span {
+  display: none !important;
+}
+
+/* Custom dashed empty slot style to replace the heavy Kumo default empty style */
+.kumo-empty-dashed {
+  border-style: dashed !important;
+  background-color: transparent !important;
+  border-color: var(--kumo-color-hairline, #e1e7ef) !important;
+  box-shadow: none !important;
+}
+
+.kumo-empty-dashed h2 {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--kumo-color-subtle, #6b7280) !important;
+}
+
+.kumo-empty-dashed svg {
+  color: var(--kumo-color-subtle, #6b7280) !important;
+  opacity: 0.7;
+}
+
+/* 移除边栏头部的底部分割线，消除与顶部条横线（CONSOLE）的高度错位 */
+[data-sidebar="header"] {
+  border-bottom: none !important;
+}
+
+/* ====================================================================
+   Auth Pages (Login, Register, Forgot Password)
+   ==================================================================== */
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100svh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--kumo-color-canvas, #f8fafc);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-card {
+  background-color: var(--kumo-color-base, #ffffff);
+  border: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-logo-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--kumo-color-line, #e1e7ef);
+  border-radius: 10px;
+  background: var(--kumo-color-control, #f4f6f8);
+  color: var(--kumo-color-brand, #f48120);
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--kumo-color-default, #111827);
+}
+
+.auth-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--kumo-color-subtle, #6b7280);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-error {
+  background-color: rgba(239, 68, 68, 0.06);
+  border: 1px solid var(--kumo-color-danger, #ef4444);
+  color: var(--kumo-color-danger, #ef4444);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--kumo-color-default, #374151);
+}
+
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--kumo-color-subtle, #9ca3af);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.auth-input-wrap input {
+  padding-left: 36px;
+  padding-right: 36px;
+  width: 100%;
+}
+
+.auth-eye-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--kumo-color-subtle, #9ca3af);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.auth-eye-toggle:hover {
+  color: var(--kumo-color-default, #374151);
+}
+
+.auth-submit {
+  margin-top: 8px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  border-top: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.auth-link {
+  color: var(--kumo-color-brand, #f48120);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.auth-footer-btn {
+  background: none;
+  border: none;
+  color: var(--kumo-color-subtle, #6b7280);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.auth-footer-btn:hover {
+  color: var(--kumo-color-default, #374151);
+  text-decoration: underline;
+}
+
+.auth-copyright {
+  color: var(--kumo-color-subtle, #9ca3af);
+  font-size: 12px;
+}
+
+.auth-success-block {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.auth-success {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--kumo-color-success, #10b981);
+  margin-bottom: 8px;
+}
+
+.auth-success-detail {
+  font-size: 13px;
+  color: var(--kumo-color-subtle, #6b7280);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ====================================================================
+   Chat Room Page
+   ==================================================================== */
+.chat-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: calc(100vh - 140px);
+  min-height: 500px;
+  background-color: var(--kumo-color-base, #ffffff);
+  border: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  border-right: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  background-color: var(--kumo-color-control, #f8fafc);
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+}
+
+.chat-sidebar-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--kumo-color-default, #374151);
+}
+
+.chat-room-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-room-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--kumo-color-default, #4b5563);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.chat-room-item:hover {
+  background-color: var(--kumo-color-tint, #eef2f6);
+  color: var(--kumo-color-default, #111827);
+}
+
+.chat-room-item.active {
+  background-color: var(--kumo-color-tint, #e2e8f0);
+  color: var(--kumo-color-brand, #f48120);
+  font-weight: 600;
+}
+
+.chat-room-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.chat-room-item .kumo-badge {
+  margin-left: auto;
+}
+
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--kumo-color-base, #ffffff);
+  height: 100%;
+}
+
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--kumo-color-default, #111827);
+}
+
+.chat-online-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--kumo-color-subtle, #6b7280);
+  background-color: var(--kumo-color-control, #f3f4f6);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.chat-online-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--kumo-color-success, #10b981);
+  border-radius: 50%;
+  display: inline-block;
+  animation: kumo-pulse 2s infinite ease-in-out;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-date-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+  position: relative;
+}
+
+.chat-date-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--kumo-color-hairline, #e1e7ef);
+  z-index: 1;
+}
+
+.chat-date-divider span {
+  position: relative;
+  z-index: 2;
+  background-color: var(--kumo-color-base, #ffffff);
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--kumo-color-subtle, #9ca3af);
+  text-transform: uppercase;
+}
+
+.chat-message {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 80%;
+}
+
+.chat-message-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.chat-message-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.chat-message-meta strong {
+  font-size: 13px;
+  color: var(--kumo-color-default, #111827);
+  font-weight: 600;
+}
+
+.chat-message-meta span {
+  font-size: 11px;
+  color: var(--kumo-color-subtle, #9ca3af);
+}
+
+.chat-message-text {
+  font-size: 13px;
+  color: var(--kumo-color-default, #374151);
+  line-height: 1.5;
+  background-color: var(--kumo-color-control, #f3f4f6);
+  padding: 8px 12px;
+  border-radius: 0 12px 12px 12px;
+  word-break: break-word;
+}
+
+.chat-input-area {
+  padding: 16px 20px;
+  border-top: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  display: flex;
+  gap: 10px;
+  background-color: var(--kumo-color-base, #ffffff);
+}
+
+.chat-input-area input {
+  flex: 1;
+}
+
+/* ====================================================================
+   Users Management Page
+   ==================================================================== */
+.users-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.users-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.users-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.users-user-info span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--kumo-color-default, #111827);
+}
+
+.users-status-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--kumo-color-default, #374151);
+  transition: background-color 0.15s ease;
+}
+
+.users-status-toggle:hover {
+  background-color: var(--kumo-color-tint, #eef2f6);
+}
+
+.users-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.users-status-dot.active {
+  background-color: var(--kumo-color-success, #10b981);
+}
+
+.users-status-dot.inactive {
+  background-color: var(--kumo-color-subtle, #9ca3af);
+}
+
+.users-role-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background-color: var(--kumo-color-base, #ffffff);
+  border: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  border-radius: 6px;
+  color: var(--kumo-color-default, #111827);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.users-role-select:focus {
+  border-color: var(--kumo-color-brand, #f48120);
+}
+
+.kumo-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kumo-provider-dialog {
+  background-color: var(--kumo-color-base, #ffffff);
+  border: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  border-radius: 8px;
+  width: min(90vw, 500px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kumo-dialog-body {
+  padding: 16px 20px;
+}
+
+.kumo-dialog-actions {
+  padding: 12px 20px;
+  border-top: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  background-color: var(--kumo-color-control, #f8fafc);
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .chat-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .chat-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--kumo-color-hairline, #e1e7ef);
+  }
+}
+
+.users-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.users-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--kumo-color-subtle, #9ca3af);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.users-search-wrap input {
+  padding-left: 36px;
+  width: 100%;
 }
