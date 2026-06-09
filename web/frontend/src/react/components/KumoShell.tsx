@@ -17,6 +17,7 @@ import {
 } from '@cloudflare/kumo'
 import {
   CaretLeft,
+  CaretRight,
   List,
   MagnifyingGlass,
   Moon,
@@ -192,7 +193,7 @@ function ShellSidebarTrigger() {
 
   return (
     <SidebarTrigger className="kumo-shell-button" aria-label={label} title={label}>
-      <CaretLeft size={16} />
+      {open ? <CaretLeft size={16} /> : <CaretRight size={16} />}
     </SidebarTrigger>
   )
 }
