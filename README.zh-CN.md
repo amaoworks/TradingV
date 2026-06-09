@@ -74,6 +74,8 @@ Studio 集成了研究工作台真正需要的肌肉:
 | **决策回放回测 (Decision Replay)** | 事件驱动的回测,在任意窗口内回放 Studio 已存储的 Agent 决策 —— 回答 *"如果我当时听了 Agent 的 Buy/Sell,现在净值会是多少?"*。**零 LLM 成本**,因为是历史回放。报告总收益、最大回撤、夏普、索提诺、胜率、盈亏比、相对基准的 alpha。每笔交易可回链到对应的源分析报告。 |
 | **K 线面板** | 在持仓页或模拟交易页按标的弹出抽屉。日线 + 1/5/15/30/60 分钟线,MA(5/10/20) + 成交量副图,可叠加入场/目标/止损参考线,支持全屏。 |
 | **API Key 与模型选择** | 每个 provider 自带模型目录(如 DeepSeek V4 Pro / V3.2 thinking / …,Claude Opus 4.7 / Sonnet 4.6 / …)。API Key 可在「设置」中直接编辑 → 写穿到 `.env`,CLI 看到的是同一份。读路径打码,原值永不回显。 |
+| **登录与用户管理** | FastAPI 后端登录/注册、签名 Bearer Token、首个注册用户自动成为管理员、本地 `admin/admin` 调试模式,以及管理员用户管理页。 |
+| **团队聊天室** | 基于房间的持久化聊天(`general`、`trading`、`strategy`、`news`),消息写入 SQLite 并从后端刷新,适合小团队联调。 |
 
 从上游继承的所有东西 —— LangGraph 工作流、多 provider LLM、决策日志、断点续跑 ——
 全部照常工作。
@@ -91,6 +93,7 @@ Studio 集成了研究工作台真正需要的肌肉:
 | **A 股数据源** | — | AKShare(免费) + Tushare Pro(可选) |
 | **持仓 / 模拟交易 / 回测** | — | ✅ |
 | **定时分析** | — | ✅ |
+| **登录 / 用户 / 聊天** | — | ✅ |
 | **自然语言输入** | — | ✅(规则 + 可选 LLM) |
 | **LLM Provider** | OpenAI / Google / Anthropic | + DeepSeek / 通义 / 智谱 / MiniMax / OpenRouter / Ollama / Azure |
 
@@ -137,7 +140,10 @@ cp .env.example .env
 **Web Studio(推荐):**
 
 ```bash
-# 同时启动后端与前端(优先用 uv 管理 Python 环境)
+# 本地调试:同时启动前后端,并创建/刷新 admin / admin
+scripts/start.sh all --debug-auth
+
+# 或不启用调试账号,在 UI 里注册第一个管理员
 scripts/start.sh all
 
 # 或分别启动
@@ -145,13 +151,19 @@ scripts/start.sh backend   # http://127.0.0.1:8000
 scripts/start.sh frontend  # http://localhost:3000
 ```
 
+`--debug-auth` 仅用于本地开发调试。它会创建或刷新一个管理员账号,
+默认账号密码是 `admin` / `admin`; 如需修改,可设置
+`TRADINGV_DEBUG_AUTH_USER` 和 `TRADINGV_DEBUG_AUTH_PASSWORD`。不启用该参数时,
+打开 `/register`,第一个注册用户会自动成为管理员。
+
 当前生效的前端是 React + Kumo。
 
-当前 Kumo 路由对齐状态:
+当前 Web 路由:
 
-- 已实现:`/`、`/analyze`、`/screener`、`/progress/:id`、`/holdings`、
+- 公开路由:`/login`、`/register`、`/forgot-password`。
+- 登录后路由:`/`、`/analyze`、`/screener`、`/progress/:id`、`/holdings`、
   `/schedule`、`/paper`、`/backtest`、`/quality`、`/history`、`/report/:id`、
-  `/settings`。
+  `/chat`、`/users`、`/settings`。
 - 旧 Vue/Naive/Pinia/Vue Router 源码与依赖已移除。
 
 生产环境单进程部署:前端构建一次,让后端直接托管静态产物:
@@ -182,15 +194,17 @@ docker compose run --rm tradingagents
 
 ## 🎬 上手试试 — 典型流程
 
-1. 打开 `http://localhost:3000/`。
+1. 打开 `http://localhost:3000/` 并登录。本地调试时,先用 `--debug-auth` 启动,然后使用 `admin` / `admin`; 否则先注册第一个管理员账号。
 2. **设置** → 填上 `DEEPSEEK_API_KEY`(或任意一个 LLM provider 的 Key)。
-3. **新建分析** → 在智能解析框里输入 `研究茅台短期` → 点击「解析并填充」 → 代码 `600519`、日期今天,全部自动填好。
-4. 选择分析师团队 —— 勾上 `Event` 看因果链输出,勾上 `CN Sentiment` 看股吧情绪 → 开始。
-5. **分析进度页**右侧会随着每一轮的完成,实时生长出 Bull 和 Bear 之间的辩论记录。
-6. 从**历史记录**打开已完成任务,在**报告详情页**查看「事件影响」Tab ——
+3. **用户管理** → 如果是多人联调,先添加其他用户。
+4. **聊天室** → 在任意频道发一条消息,确认登录态和多人消息同步正常。
+5. **新建分析** → 在智能解析框里输入 `研究茅台短期` → 点击「解析并填充」 → 代码 `600519`、日期今天,全部自动填好。
+6. 选择分析师团队 —— 勾上 `Event` 看因果链输出,勾上 `CN Sentiment` 看股吧情绪 → 开始。
+7. **分析进度页**右侧会随着每一轮的完成,实时生长出 Bull 和 Bear 之间的辩论记录。
+8. 从**历史记录**打开已完成任务,在**报告详情页**查看「事件影响」Tab ——
    一张张事件卡片展示 事件 → 影响 → 供应链 → 板块 → 个股,不再是一堵 Markdown 墙。
-7. 在**持仓追踪**里把该标的加入,填上股数和成本。持仓页会显示实时价格、盈亏,以及链回最新一次分析信号的入口。
-8. 在**模拟交易**页对任意持仓打开 K 线抽屉 —— 日线 + 1/5/15/30/60 分钟线,带 MA(5/10/20)、成交量副图,以及从决策卡同步过来的入场/目标/止损参考线。
+9. 在**持仓追踪**里把该标的加入,填上股数和成本。持仓页会显示实时价格、盈亏,以及链回最新一次分析信号的入口。
+10. 在**模拟交易**页对任意持仓打开 K 线抽屉 —— 日线 + 1/5/15/30/60 分钟线,带 MA(5/10/20)、成交量副图,以及从决策卡同步过来的入场/目标/止损参考线。
 
 ![模拟交易与 K 线面板](assets/screenshots/paper-trading-kline.png)
 

@@ -11,6 +11,7 @@ from web.backend import database as db
 @pytest.fixture(autouse=True)
 def setup_db(tmp_path, monkeypatch):
     monkeypatch.setattr(db, "_DB_PATH", str(tmp_path / "test.db"))
+    monkeypatch.delenv("TRADINGV_DEBUG_AUTH", raising=False)
     db.init_db()
 
 
@@ -38,6 +39,104 @@ class TestHealth:
         r = client.get("/api/health")
         assert r.status_code == 200
         assert r.json() == {"status": "ok"}
+
+
+class TestAuthAndUsers:
+    def _debug_admin_headers(self, client, monkeypatch):
+        monkeypatch.setenv("TRADINGV_DEBUG_AUTH", "1")
+        r = client.post("/api/auth/login", json={"username": "admin", "password": "admin"})
+        assert r.status_code == 200
+        return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+    def test_login_without_user_rejects_by_default(self, client):
+        r = client.post("/api/auth/login", json={"username": "admin", "password": "admin"})
+        assert r.status_code == 401
+
+    def test_register_first_user_as_admin_and_login(self, client):
+        r = client.post("/api/auth/register", json={
+            "username": "owner",
+            "email": "owner@example.com",
+            "password": "secret",
+        })
+        assert r.status_code == 201
+        assert r.json()["user"]["role"] == "admin"
+
+        r = client.post("/api/auth/login", json={"username": "owner", "password": "secret"})
+        assert r.status_code == 200
+        token = r.json()["access_token"]
+
+        r = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert r.status_code == 200
+        assert r.json()["username"] == "owner"
+
+    def test_debug_auth_login_creates_admin(self, client, monkeypatch):
+        monkeypatch.setenv("TRADINGV_DEBUG_AUTH", "1")
+        r = client.post("/api/auth/login", json={"username": "admin", "password": "admin"})
+        assert r.status_code == 200
+        data = r.json()
+        assert data["access_token"].count(".") == 2
+        assert data["user"]["username"] == "admin"
+        assert data["user"]["role"] == "admin"
+
+    def test_debug_auth_rejects_wrong_password(self, client, monkeypatch):
+        monkeypatch.setenv("TRADINGV_DEBUG_AUTH", "1")
+        r = client.post("/api/auth/login", json={"username": "admin", "password": "wrong"})
+        assert r.status_code == 401
+
+    def test_user_crud_requires_admin(self, client, monkeypatch):
+        r = client.get("/api/users")
+        assert r.status_code == 401
+
+        headers = self._debug_admin_headers(client, monkeypatch)
+
+        r = client.post("/api/users", headers=headers, json={
+            "username": "viewer1",
+            "email": "viewer1@example.com",
+            "password": "secret",
+            "role": "viewer",
+        })
+        assert r.status_code == 201
+        user = r.json()
+        assert user["role"] == "viewer"
+        assert user["active"] is True
+
+        r = client.get("/api/users", headers=headers)
+        assert r.status_code == 200
+        assert {u["username"] for u in r.json()["items"]} == {"admin", "viewer1"}
+
+        r = client.put(f"/api/users/{user['id']}", headers=headers, json={"active": False})
+        assert r.status_code == 200
+        assert r.json()["active"] is False
+
+        r = client.delete(f"/api/users/{user['id']}", headers=headers)
+        assert r.status_code == 200
+        assert r.json()["ok"] is True
+
+    def test_chat_requires_auth(self, client):
+        r = client.get("/api/chat/rooms")
+        assert r.status_code == 401
+
+    def test_chat_rooms_and_messages(self, client, monkeypatch):
+        headers = self._debug_admin_headers(client, monkeypatch)
+
+        r = client.get("/api/chat/rooms", headers=headers)
+        assert r.status_code == 200
+        rooms = r.json()["items"]
+        assert {room["key"] for room in rooms} >= {"general", "trading", "strategy", "news"}
+        assert rooms[0]["messages"]
+
+        r = client.post(
+            "/api/chat/rooms/general/messages",
+            headers=headers,
+            json={"text": "hello from pytest"},
+        )
+        assert r.status_code == 201
+        assert r.json()["user"] == "admin"
+        assert r.json()["text"] == "hello from pytest"
+
+        r = client.get("/api/chat/rooms/general/messages", headers=headers)
+        assert r.status_code == 200
+        assert any(message["text"] == "hello from pytest" for message in r.json()["items"])
 
 
 class TestSettings:

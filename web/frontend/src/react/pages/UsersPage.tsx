@@ -1,8 +1,9 @@
 import { Badge, Button, Input, Label, Table } from '@cloudflare/kumo'
 import { MagnifyingGlass, PencilSimple, Plus, Trash, X } from '@phosphor-icons/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 import { PageHeader, SectionCard } from '../components/Page'
+import api from '../lib/api'
 
 type Role = 'admin' | 'member' | 'viewer'
 
@@ -24,49 +25,6 @@ interface UserForm {
 
 const AVATAR_COLORS = ['#f48120', '#2e7df5', '#22c55e', '#a855f7', '#ef4444']
 
-const INITIAL_USERS: User[] = [
-  {
-    id: '1',
-    username: 'admin',
-    email: 'admin@tradingv.com',
-    role: 'admin',
-    active: true,
-    lastLogin: '2026-06-09 06:30',
-  },
-  {
-    id: '2',
-    username: 'alice_wang',
-    email: 'alice.wang@tradingv.com',
-    role: 'member',
-    active: true,
-    lastLogin: '2026-06-08 14:15',
-  },
-  {
-    id: '3',
-    username: 'bob_chen',
-    email: 'bob.chen@tradingv.com',
-    role: 'member',
-    active: true,
-    lastLogin: '2026-06-07 09:45',
-  },
-  {
-    id: '4',
-    username: 'charlie_li',
-    email: 'charlie.li@tradingv.com',
-    role: 'viewer',
-    active: false,
-    lastLogin: '2026-05-28 18:00',
-  },
-  {
-    id: '5',
-    username: 'diana_zhang',
-    email: 'diana.zhang@tradingv.com',
-    role: 'member',
-    active: true,
-    lastLogin: '2026-06-09 07:00',
-  },
-]
-
 const BLANK_FORM: UserForm = { username: '', email: '', password: '', role: 'member' }
 
 function avatarColor(username: string): string {
@@ -79,13 +37,33 @@ function avatarColor(username: string): string {
 
 export function UsersPage() {
   const { t } = useI18n()
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS)
+  const [users, setUsers] = useState<User[]>([])
   const [search, setSearch] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deletingUser, setDeletingUser] = useState<User | null>(null)
   const [form, setForm] = useState<UserForm>(BLANK_FORM)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const { data } = await api.get<{ items: User[] }>('/api/users')
+      setUsers(data.items)
+    } catch {
+      setError(t('login.networkError'))
+    } finally {
+      setLoading(false)
+    }
+  }, [t])
+
+  useEffect(() => {
+    void loadUsers()
+  }, [loadUsers])
 
   const filteredUsers = useMemo(() => {
     if (!search.trim()) return users
@@ -112,44 +90,63 @@ export function UsersPage() {
     setDeleteDialogOpen(true)
   }, [])
 
-  const toggleStatus = useCallback((id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, active: !u.active } : u))
-    )
-  }, [])
+  const toggleStatus = useCallback(async (user: User) => {
+    setError('')
+    try {
+      const { data } = await api.put<User>(`/api/users/${user.id}`, { active: !user.active })
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? data : u)))
+    } catch {
+      setError(t('login.networkError'))
+    }
+  }, [t])
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!form.username.trim() || !form.email.trim()) return
     if (!editingUser && !form.password.trim()) return
 
-    if (editingUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id
-            ? { ...u, username: form.username, email: form.email, role: form.role }
-            : u
-        )
-      )
-    } else {
-      const newUser: User = {
-        id: String(Date.now()),
-        username: form.username,
-        email: form.email,
-        role: form.role,
-        active: true,
-        lastLogin: '-',
+    setSaving(true)
+    setError('')
+    try {
+      if (editingUser) {
+        const { data } = await api.put<User>(`/api/users/${editingUser.id}`, {
+          username: form.username,
+          email: form.email,
+          role: form.role,
+        })
+        setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? data : u)))
+      } else {
+        const { data } = await api.post<User>('/api/users', {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          role: form.role,
+          active: true,
+        })
+        setUsers((prev) => [...prev, data])
       }
-      setUsers((prev) => [...prev, newUser])
+      setDialogOpen(false)
+    } catch {
+      setError(t('login.networkError'))
+    } finally {
+      setSaving(false)
     }
-    setDialogOpen(false)
-  }, [editingUser, form])
+  }, [editingUser, form, t])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!deletingUser) return
-    setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id))
-    setDeleteDialogOpen(false)
-    setDeletingUser(null)
-  }, [deletingUser])
+    setSaving(true)
+    setError('')
+    try {
+      await api.delete(`/api/users/${deletingUser.id}`)
+      setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id))
+      setDeleteDialogOpen(false)
+      setDeletingUser(null)
+    } catch {
+      setError(t('login.networkError'))
+    } finally {
+      setSaving(false)
+    }
+  }, [deletingUser, t])
 
   const roleBadgeVariant = (role: Role) => {
     if (role === 'admin') return 'warning' as const
@@ -180,6 +177,10 @@ export function UsersPage() {
         </div>
       </SectionCard>
 
+      {error && (
+        <div className="auth-error" role="alert">{error}</div>
+      )}
+
       <SectionCard>
         <div className="kumo-table-wrap">
           <Table>
@@ -194,7 +195,7 @@ export function UsersPage() {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {filteredUsers.map((user) => (
+              {(loading ? [] : filteredUsers).map((user) => (
                 <Table.Row key={user.id}>
                   <Table.Cell>
                     <div className="users-user-cell">
@@ -219,7 +220,7 @@ export function UsersPage() {
                     <button
                       type="button"
                       className="users-status-toggle"
-                      onClick={() => toggleStatus(user.id)}
+                      onClick={() => toggleStatus(user)}
                     >
                       <span
                         className={`users-status-dot ${user.active ? 'active' : 'inactive'}`}
@@ -318,7 +319,9 @@ export function UsersPage() {
               <Button variant="secondary" icon={X} onClick={() => setDialogOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button onClick={handleSave}>{t('common.save')}</Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? t('common.saving') : t('common.save')}
+              </Button>
             </div>
           </div>
         </div>

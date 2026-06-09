@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND_DIR="$ROOT_DIR/web/frontend"
 
-MODE="${1:-all}"
+MODE="all"
 BACKEND_HOST="${BACKEND_HOST:-0.0.0.0}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 BACKEND_PORT_START="$BACKEND_PORT"
@@ -24,13 +24,16 @@ PUBLIC_IP_LOOKUP_URL="${PUBLIC_IP_LOOKUP_URL:-https://api.ipify.org}"
 DETECTED_PUBLIC_HOST=""
 PRINT_URLS="${PRINT_URLS:-1}"
 SHOW_COMMAND="${SHOW_COMMAND:-0}"
+DEBUG_AUTH="${TRADINGV_DEBUG_AUTH:-0}"
+DEBUG_AUTH_USER="${TRADINGV_DEBUG_AUTH_USER:-admin}"
+DEBUG_AUTH_PASSWORD="${TRADINGV_DEBUG_AUTH_PASSWORD:-admin}"
 
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/start.sh frontend   Start Vite frontend only
-  scripts/start.sh backend    Start FastAPI backend only
-  scripts/start.sh all        Start backend and frontend
+  scripts/start.sh frontend                  Start Vite frontend only
+  scripts/start.sh backend [--debug-auth]    Start FastAPI backend only
+  scripts/start.sh all [--debug-auth]        Start backend and frontend
 
 Environment:
   BACKEND_HOST=0.0.0.0
@@ -46,14 +49,69 @@ Environment:
   AUTO_PORT=1               auto-select the next free port when occupied
   PORT_SCAN_LIMIT=50        number of ports to scan when AUTO_PORT=1
   SHOW_COMMAND=0            set to 1 to print the backend command
+  TRADINGV_DEBUG_AUTH=0     set to 1 to enable the debug login endpoint
+  TRADINGV_DEBUG_AUTH_USER=admin
+  TRADINGV_DEBUG_AUTH_PASSWORD=admin
   BACKEND_EXTRAS="web cn"     uv extras used for backend startup
   PUBLIC_HOST=1.2.3.4         override the public host shown in debug URLs
   PUBLIC_IP_LOOKUP_URL=https://api.ipify.org
+
+Options:
+  --debug-auth              enable backend admin/admin debug login for local testing
 EOF
+}
+
+parse_args() {
+  local mode_set=0
+
+  while (($#)); do
+    case "$1" in
+      frontend|backend|all)
+        if [[ "$mode_set" == "1" ]]; then
+          echo "Multiple modes provided: $MODE and $1" >&2
+          usage >&2
+          exit 2
+        fi
+        MODE="$1"
+        mode_set=1
+        ;;
+      --debug-auth)
+        DEBUG_AUTH=1
+        ;;
+      --no-debug-auth)
+        DEBUG_AUTH=0
+        ;;
+      -h|--help|help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+    shift
+  done
+
+  export TRADINGV_DEBUG_AUTH="$DEBUG_AUTH"
+  export TRADINGV_DEBUG_AUTH_USER="$DEBUG_AUTH_USER"
+  export TRADINGV_DEBUG_AUTH_PASSWORD="$DEBUG_AUTH_PASSWORD"
 }
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
+}
+
+debug_auth_enabled() {
+  case "${DEBUG_AUTH,,}" in
+    1|true|yes|on)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 is_port_open() {
@@ -179,6 +237,11 @@ print_open_hint() {
   echo "  local:  http://$(local_url_host "$BACKEND_HOST"):$BACKEND_PORT"
   if [[ -n "$public_host" ]] && ! is_loopback_host "$BACKEND_HOST"; then
     echo "  public: http://$public_host:$BACKEND_PORT"
+  fi
+
+  if debug_auth_enabled; then
+    echo "Debug auth:"
+    echo "  enabled: username '$DEBUG_AUTH_USER', password '$DEBUG_AUTH_PASSWORD'"
   fi
 }
 
@@ -340,6 +403,8 @@ start_all() {
   cleanup
   wait "$backend_pid" "$frontend_pid" >/dev/null 2>&1 || true
 }
+
+parse_args "$@"
 
 case "$MODE" in
   frontend)

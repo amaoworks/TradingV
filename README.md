@@ -77,6 +77,8 @@ Studio bundles the muscles a research workbench actually needs:
 | **决策质量看板 (Decision Quality)** | The next step after backtest. Scores **every individual completed analysis** against real N-day price moves (5 / 30 / 60-day horizons), benchmarked against the regional index. Surfaces overall win-rate / avg α / Sharpe, a **confidence-calibration curve** (does "0.8 confidence" actually win 80%?), breakdowns by **ticker / signal / single analyst / analyst combo / LLM model** (so you can answer *"did adding `capital_flow` improve alpha?"*), and a per-day calendar heatmap. Computed on demand — no extra tables, no LLM cost. |
 | **K-line panel** | Per-ticker drawer from Holdings or Paper rows. Daily + 1/5/15/30/60-min bars, MA(5/10/20) + volume overlays, optional entry/target/stop reference lines, fullscreen mode. |
 | **API key & model picker** | Per-provider model catalog (e.g. DeepSeek V4 Pro / V3.2 thinking / …, Claude Opus 4.7 / Sonnet 4.6 / …). API keys editable from Settings → written through to `.env` so the CLI sees the same values. Keys masked in read path, raw never echoed. |
+| **Login & users** | FastAPI-backed login/register, signed bearer tokens, first-user admin bootstrap, local `admin/admin` debug mode, and an admin user-management page. |
+| **Team chat** | Persistent room-based chat (`general`, `trading`, `strategy`, `news`) stored in SQLite and refreshed from the backend for small-team debugging. |
 
 Everything inherited from upstream — the LangGraph workflow, multi-provider LLMs,
 decision log, checkpoint resume — still works as before.
@@ -95,6 +97,7 @@ decision log, checkpoint resume — still works as before.
 | **Holdings / paper / backtest** | — | ✅ |
 | **Decision-quality dashboard** | — | ✅ (win-rate / alpha / calibration per analyst combo & LLM) |
 | **Scheduled analyses** | — | ✅ |
+| **Auth / users / chat** | — | ✅ |
 | **Natural-language input** | — | ✅ (rule-based + optional LLM) |
 | **LLM providers** | OpenAI / Google / Anthropic | + DeepSeek / 通义 / 智谱 / MiniMax / OpenRouter / Ollama / Azure |
 
@@ -141,7 +144,10 @@ values are written through to `.env` so the CLI sees the same keys.
 **Web Studio (recommended):**
 
 ```bash
-# Start both backend and frontend (prefers uv for Python env)
+# Local debugging: start both services and create/refresh admin / admin
+scripts/start.sh all --debug-auth
+
+# Or start without the debug account and register the first admin in the UI
 scripts/start.sh all
 
 # Or start them separately
@@ -149,13 +155,20 @@ scripts/start.sh backend   # http://127.0.0.1:8000
 scripts/start.sh frontend  # http://localhost:3000
 ```
 
+`--debug-auth` is for local development only. It creates or refreshes an
+administrator with the default credentials `admin` / `admin`; override them
+with `TRADINGV_DEBUG_AUTH_USER` and `TRADINGV_DEBUG_AUTH_PASSWORD` if needed.
+Without that flag, open `/register` and the first registered account becomes
+an administrator.
+
 The active frontend is React + Kumo.
 
-Current Kumo route parity:
+Current Web routes:
 
-- Implemented: `/`, `/analyze`, `/screener`, `/progress/:id`, `/holdings`,
+- Public: `/login`, `/register`, `/forgot-password`.
+- Authenticated: `/`, `/analyze`, `/screener`, `/progress/:id`, `/holdings`,
   `/schedule`, `/paper`, `/backtest`, `/quality`, `/history`, `/report/:id`,
-  `/settings`.
+  `/chat`, `/users`, `/settings`.
 - Legacy Vue/Naive/Pinia/Vue Router sources and dependencies have been removed.
 
 For production single-process deployment, build the frontend once and let
@@ -187,16 +200,18 @@ docker compose run --rm tradingagents
 
 ## 🎬 Try it out — typical flow
 
-1. Open `http://localhost:3000/`.
+1. Open `http://localhost:3000/` and sign in. For local debugging, use `admin` / `admin` after starting with `--debug-auth`; otherwise register the first admin account.
 2. **Settings** → fill in your `DEEPSEEK_API_KEY` (or any LLM provider's key).
-3. **新建分析** → type `研究茅台短期` in the smart-parse box → click 解析并填充 → ticker `600519`, date today, all set.
-4. Pick analyst team — check `Event` for the causal-chain output and `CN Sentiment` for 股吧 — start.
-5. On the **Analysis Progress** page, the right side grows a live debate transcript between Bull and Bear as rounds complete.
-6. Open the completed run from **History** and inspect the **Event impact** tab:
+3. **Users** → add the other local users if you are testing as a small team.
+4. **Chat** → send a message in a room to confirm authenticated multi-user state is working.
+5. **新建分析** → type `研究茅台短期` in the smart-parse box → click 解析并填充 → ticker `600519`, date today, all set.
+6. Pick analyst team — check `Event` for the causal-chain output and `CN Sentiment` for 股吧 — start.
+7. On the **Analysis Progress** page, the right side grows a live debate transcript between Bull and Bear as rounds complete.
+8. Open the completed run from **History** and inspect the **Event impact** tab:
    per-event cards show event → impact → supply chain → sector → individual
    stocks instead of a wall of Markdown.
-7. Add the ticker to **持仓追踪** with shares + cost. The Holdings page shows real-time price, P&L, and links to the latest analysis signal.
-8. From **模拟交易** open the K-line drawer for any held ticker — daily + 1/5/15/30/60-min bars with MA(5/10/20), volume, and entry/target/stop overlays from the decision card.
+9. Add the ticker to **持仓追踪** with shares + cost. The Holdings page shows real-time price, P&L, and links to the latest analysis signal.
+10. From **模拟交易** open the K-line drawer for any held ticker — daily + 1/5/15/30/60-min bars with MA(5/10/20), volume, and entry/target/stop overlays from the decision card.
 
 ![Paper trading with K-line panel](assets/screenshots/paper-trading-kline.png)
 

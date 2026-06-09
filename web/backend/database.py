@@ -59,6 +59,41 @@ CREATE TABLE IF NOT EXISTS holdings (
 );
 CREATE INDEX IF NOT EXISTS idx_holdings_ticker ON holdings(ticker);
 
+CREATE TABLE IF NOT EXISTS users (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT NOT NULL UNIQUE,
+    email         TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role          TEXT NOT NULL DEFAULT 'member',
+    avatar        TEXT,
+    is_active     INTEGER NOT NULL DEFAULT 1,
+    last_login    TEXT,
+    created_at    TEXT NOT NULL,
+    updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+CREATE TABLE IF NOT EXISTS chat_rooms (
+    key         TEXT PRIMARY KEY,
+    i18n_key    TEXT NOT NULL,
+    online_hint INTEGER NOT NULL DEFAULT 0,
+    sort_order  INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_key    TEXT NOT NULL REFERENCES chat_rooms(key) ON DELETE CASCADE,
+    user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    username    TEXT NOT NULL,
+    text        TEXT NOT NULL,
+    created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_room ON chat_messages(room_key, id);
+
 CREATE TABLE IF NOT EXISTS schedules (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     name             TEXT,
@@ -212,9 +247,205 @@ def get_db():
         conn.close()
 
 
+_DEFAULT_CHAT_ROOMS = [
+    ("general", "chat.general", 24, 10),
+    ("trading", "chat.trading", 18, 20),
+    ("strategy", "chat.strategy", 12, 30),
+    ("news", "chat.news", 31, 40),
+]
+
+_DEFAULT_CHAT_MESSAGES = [
+    ("general", "Admin", "Welcome to TradingV! Please be respectful and follow the community guidelines.", "09:00"),
+    ("general", "Alice", "Good morning everyone! Markets are looking interesting today.", "09:12"),
+    ("general", "Bob", "Hey Alice! Yeah, pre-market futures are up across the board.", "09:15"),
+    ("general", "Charlie", "Anyone keeping an eye on the Fed minutes releasing later?", "09:22"),
+    ("general", "Diana", "Already positioned for it. Should be a volatile session.", "09:30"),
+    ("trading", "Bob", "Just opened a long position on AAPL at $192.40, targeting $198.", "09:45"),
+    ("trading", "Diana", "Bold move. Earnings are next week, could see a run-up.", "09:48"),
+    ("trading", "Alice", "I'm watching NVDA closely. The pullback to the 50-day MA looks like a solid entry.", "09:55"),
+    ("trading", "Charlie", "Set my stop-loss at $185 for the SPY puts. Risk management is key.", "10:02"),
+    ("strategy", "Alice", "Has anyone backtested the mean-reversion strategy on crypto pairs?", "10:10"),
+    ("strategy", "Charlie", "Yes, works well on BTC/ETH in sideways markets. Sharpe ratio around 1.8.", "10:14"),
+    ("strategy", "Admin", "We just added new backtesting templates in the Strategy section. Check them out!", "10:20"),
+    ("strategy", "Bob", "I prefer momentum strategies with a 20/50 EMA crossover. Simple but effective.", "10:25"),
+    ("strategy", "Diana", "Combining momentum with volume profile gives much better signals in my experience.", "10:30"),
+    ("news", "Admin", "Breaking: CPI data came in at 3.2%, below the expected 3.4%.", "08:30"),
+    ("news", "Diana", "Markets rallying on the news. Treasury yields dropping fast.", "08:35"),
+    ("news", "Bob", "Tech sector leading the move. QQQ up 1.5% already.", "08:40"),
+]
+
+
+def _seed_chat_defaults(conn):
+    now = datetime.utcnow().isoformat() + "Z"
+    for key, i18n_key, online_hint, sort_order in _DEFAULT_CHAT_ROOMS:
+        conn.execute(
+            "INSERT OR IGNORE INTO chat_rooms (key, i18n_key, online_hint, sort_order, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (key, i18n_key, online_hint, sort_order, now, now),
+        )
+
+    existing_messages = conn.execute("SELECT COUNT(*) FROM chat_messages").fetchone()[0]
+    if existing_messages:
+        return
+
+    today = datetime.utcnow().date().isoformat()
+    for room_key, username, text, time_text in _DEFAULT_CHAT_MESSAGES:
+        conn.execute(
+            "INSERT INTO chat_messages (room_key, user_id, username, text, created_at) "
+            "VALUES (?, NULL, ?, ?, ?)",
+            (room_key, username, text, f"{today}T{time_text}:00Z"),
+        )
+
+
 def init_db():
     with get_db() as conn:
         conn.executescript(_SCHEMA)
+        _seed_chat_defaults(conn)
+
+
+# --- Chat ---
+
+def list_chat_rooms() -> list:
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM chat_rooms ORDER BY sort_order, key"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_chat_room(room_key: str) -> Optional[dict]:
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM chat_rooms WHERE key = ?", (room_key,)).fetchone()
+    return dict(row) if row else None
+
+
+def list_chat_messages(room_key: str, limit: int = 200) -> list:
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM ("
+            "SELECT * FROM chat_messages WHERE room_key = ? ORDER BY id DESC LIMIT ?"
+            ") ORDER BY id",
+            (room_key, limit),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_chat_message(room_key: str, user_id: int, username: str, text: str) -> Optional[dict]:
+    now = datetime.utcnow().isoformat() + "Z"
+    with get_db() as conn:
+        room = conn.execute("SELECT key FROM chat_rooms WHERE key = ?", (room_key,)).fetchone()
+        if not room:
+            return None
+        cur = conn.execute(
+            "INSERT INTO chat_messages (room_key, user_id, username, text, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (room_key, user_id, username, text, now),
+        )
+        row = conn.execute("SELECT * FROM chat_messages WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+# --- Users / Auth ---
+
+def create_user(
+    *,
+    username: str,
+    email: str,
+    password_hash: str,
+    role: str = "member",
+    avatar: Optional[str] = None,
+    is_active: bool = True,
+) -> dict:
+    now = datetime.utcnow().isoformat() + "Z"
+    with get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO users (username, email, password_hash, role, avatar, "
+            "is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (username, email, password_hash, role, avatar, 1 if is_active else 0, now, now),
+        )
+        row = conn.execute("SELECT * FROM users WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+def get_user(user_id: int) -> Optional[dict]:
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_username(username: str) -> Optional[dict]:
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_email(email: str) -> Optional[dict]:
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    return dict(row) if row else None
+
+
+def count_users() -> int:
+    with get_db() as conn:
+        return int(conn.execute("SELECT COUNT(*) FROM users").fetchone()[0])
+
+
+def count_active_admin_users(exclude_user_id: Optional[int] = None) -> int:
+    sql = "SELECT COUNT(*) FROM users WHERE role = 'admin' AND is_active = 1"
+    params: list = []
+    if exclude_user_id is not None:
+        sql += " AND id != ?"
+        params.append(exclude_user_id)
+    with get_db() as conn:
+        return int(conn.execute(sql, params).fetchone()[0])
+
+
+def list_users(search: Optional[str] = None) -> list:
+    params: list = []
+    where = ""
+    if search:
+        where = "WHERE username LIKE ? OR email LIKE ?"
+        q = f"%{search}%"
+        params.extend([q, q])
+    with get_db() as conn:
+        rows = conn.execute(
+            f"SELECT * FROM users {where} ORDER BY role = 'admin' DESC, username",
+            params,
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def update_user(user_id: int, **fields) -> Optional[dict]:
+    allowed = {"username", "email", "password_hash", "role", "avatar", "is_active", "last_login"}
+    cols, vals = [], []
+    for k, v in fields.items():
+        if k not in allowed:
+            continue
+        if v is None and k not in {"avatar", "last_login"}:
+            continue
+        cols.append(f"{k} = ?")
+        if k == "is_active":
+            vals.append(1 if v else 0)
+        else:
+            vals.append(v)
+    if not cols:
+        return get_user(user_id)
+    cols.append("updated_at = ?")
+    vals.append(datetime.utcnow().isoformat() + "Z")
+    vals.append(user_id)
+    with get_db() as conn:
+        conn.execute(f"UPDATE users SET {', '.join(cols)} WHERE id = ?", vals)
+    return get_user(user_id)
+
+
+def touch_user_login(user_id: int) -> Optional[dict]:
+    now = datetime.utcnow().isoformat() + "Z"
+    return update_user(user_id, last_login=now)
+
+
+def delete_user(user_id: int):
+    with get_db() as conn:
+        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
 
 
 # --- Analyses CRUD ---
