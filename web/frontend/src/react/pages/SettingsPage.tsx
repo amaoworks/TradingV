@@ -98,8 +98,15 @@ export function SettingsPage() {
       const activeProvider =
         nextProviders.providers.some((row) => row.provider === nextSettings.llm_provider)
           ? nextSettings.llm_provider
-          : nextProviders.providers[0]?.provider || nextSettings.llm_provider || ''
-      setSettings({ ...blankSettings, ...nextSettings, llm_provider: activeProvider })
+          : nextProviders.providers[0]?.provider || ''
+      setSettings({
+        ...blankSettings,
+        ...nextSettings,
+        llm_provider: activeProvider,
+        deep_think_llm: activeProvider ? nextSettings.deep_think_llm || '' : '',
+        quick_think_llm: activeProvider ? nextSettings.quick_think_llm || '' : '',
+        backend_url: activeProvider ? nextSettings.backend_url || '' : '',
+      })
     } catch (err) {
       setError(errorMessage(err, t('common.unknownError')))
     } finally {
@@ -171,7 +178,14 @@ export function SettingsPage() {
     setProviders(next.providers)
     setChoices(next.available)
     if (settings.llm_provider === provider) {
-      update('llm_provider', next.providers[0]?.provider || '')
+      const replacement = next.providers[0]
+      setSettings((current) => ({
+        ...current,
+        llm_provider: replacement?.provider || '',
+        deep_think_llm: '',
+        quick_think_llm: '',
+        backend_url: replacement?.base_url || '',
+      }))
     }
   }
 
@@ -185,7 +199,18 @@ export function SettingsPage() {
         delete payload.backend_url
       }
       const next = await updateSettings(payload)
-      setSettings({ ...blankSettings, ...next })
+      const activeProvider =
+        providers.some((row) => row.provider === next.llm_provider)
+          ? next.llm_provider
+          : providers[0]?.provider || ''
+      setSettings({
+        ...blankSettings,
+        ...next,
+        llm_provider: activeProvider,
+        deep_think_llm: activeProvider ? next.deep_think_llm || '' : '',
+        quick_think_llm: activeProvider ? next.quick_think_llm || '' : '',
+        backend_url: activeProvider ? next.backend_url || '' : '',
+      })
     } catch (err) {
       setError(errorMessage(err, t('common.unknownError')))
     } finally {
@@ -201,23 +226,30 @@ export function SettingsPage() {
       <SectionCard title={t('settings.llmCard')}>
         {loading ? (
           <LoadingEmpty loading title={t('common.empty')} />
+        ) : !providers.length ? (
+          <div className="kumo-settings-empty">
+            <p>{t('settings.providerPlaceholder')}</p>
+            <Button size="sm" onClick={() => openProviderModal()}>{t('settings.addProvider')}</Button>
+          </div>
         ) : (
-          <div className="kumo-form-grid">
-            <Select
-              label={t('settings.provider')}
-              value={settings.llm_provider}
-              items={configuredProviderItems}
-              placeholder={t('settings.providerPlaceholder')}
-              onValueChange={(value) => {
-                const provider = String(value || '')
-                const row = providers.find((item) => item.provider === provider)
-                setSettings((current) => ({
-                  ...current,
-                  llm_provider: provider,
-                  backend_url: row?.base_url || '',
-                }))
-              }}
-            />
+          <div className="kumo-form-grid kumo-settings-llm-grid">
+            <div className="kumo-settings-provider-field">
+              <Select
+                label={t('settings.provider')}
+                value={settings.llm_provider}
+                items={configuredProviderItems}
+                placeholder={t('settings.providerPlaceholder')}
+                onValueChange={(value) => {
+                  const provider = String(value || '')
+                  const row = providers.find((item) => item.provider === provider)
+                  setSettings((current) => ({
+                    ...current,
+                    llm_provider: provider,
+                    backend_url: row?.base_url || '',
+                  }))
+                }}
+              />
+            </div>
             <ModelPicker
               label={t('settings.deepModel')}
               value={settings.deep_think_llm}
@@ -351,11 +383,11 @@ export function SettingsPage() {
       </div>
 
       <Dialog.Root open={providerDialogOpen} onOpenChange={setProviderDialogOpen}>
-        <Dialog size="lg">
+        <Dialog size="lg" className="kumo-provider-dialog">
           <Dialog.Title>
             {editingProvider ? t('settings.editProvider') : t('settings.addProvider')}
           </Dialog.Title>
-          <div className="kumo-dialog-body">
+          <div className="kumo-dialog-body kumo-provider-dialog-grid">
             <Select
               label={t('settings.provider')}
               value={providerForm.provider}
@@ -363,19 +395,23 @@ export function SettingsPage() {
               disabled={Boolean(editingProvider)}
               onValueChange={(value) => updateProviderSelection(String(value || ''))}
             />
-            <Input
-              label={t('settings.apiBaseUrl')}
-              value={providerForm.base_url}
-              placeholder={selectedChoice?.default_base_url || t('settings.apiBaseUrlPlaceholder')}
-              onChange={(event) => setProviderForm((current) => ({ ...current, base_url: event.currentTarget.value }))}
-            />
-            <SensitiveInput
-              label={t('settings.apiKey')}
-              value={providerForm.api_key}
-              placeholder={apiKeyPlaceholder}
-              disabled={!selectedChoice?.required}
-              onChange={(event) => setProviderForm((current) => ({ ...current, api_key: event.currentTarget.value }))}
-            />
+            <div className="full-width">
+              <Input
+                label={t('settings.apiBaseUrl')}
+                value={providerForm.base_url}
+                placeholder={selectedChoice?.default_base_url || t('settings.apiBaseUrlPlaceholder')}
+                onChange={(event) => setProviderForm((current) => ({ ...current, base_url: event.currentTarget.value }))}
+              />
+            </div>
+            <div className="full-width">
+              <SensitiveInput
+                label={t('settings.apiKey')}
+                value={providerForm.api_key}
+                placeholder={apiKeyPlaceholder}
+                disabled={!selectedChoice?.required}
+                onChange={(event) => setProviderForm((current) => ({ ...current, api_key: event.currentTarget.value }))}
+              />
+            </div>
           </div>
           <div className="kumo-dialog-actions">
             <Dialog.Close render={(props) => <Button {...props}>{t('common.cancel')}</Button>} />

@@ -3,6 +3,38 @@
 :root {
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --kumo-color-base: var(--color-kumo-base);
+  --kumo-color-canvas: var(--color-kumo-canvas);
+  --kumo-color-control: var(--color-kumo-control);
+  --kumo-color-contrast: var(--color-kumo-contrast);
+  --kumo-color-danger: var(--color-kumo-danger);
+  --kumo-color-default: var(--text-color-kumo-default);
+  --kumo-color-fill: var(--color-kumo-fill);
+  --kumo-color-hairline: var(--color-kumo-hairline);
+  --kumo-color-info: var(--color-kumo-info);
+  --kumo-color-line: var(--color-kumo-line);
+  --kumo-color-subtle: var(--text-color-kumo-subtle);
+  --kumo-color-success: var(--color-kumo-success);
+  --kumo-color-tint: var(--color-kumo-tint);
+  --kumo-color-warning: var(--color-kumo-warning);
+  --kumo-color-brand: var(--color-kumo-brand);
+  --market-up-color: var(--kumo-color-danger);
+  --market-down-color: var(--kumo-color-success);
+}
+
+:root[data-mode='dark'] {
+  color-scheme: dark;
+}
+
+:root[data-market-theme='green'] {
+  --market-up-color: var(--kumo-color-success);
+  --market-down-color: var(--kumo-color-danger);
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
 }
 
 body {
@@ -12,7 +44,9 @@ body {
 
 .kumo-app {
   display: flex;
-  min-height: 100vh;
+  width: 100%;
+  min-width: 0;
+  min-height: 100svh;
   background: var(--kumo-color-canvas, #f8fafc);
   color: var(--kumo-color-default, #374151);
 }
@@ -32,6 +66,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 12px 10px;
+  min-width: 0;
 }
 
 .kumo-brand-mark {
@@ -65,6 +100,7 @@ body {
   justify-content: center;
   gap: 4px;
   padding: 8px 6px;
+  min-width: 0;
 }
 
 .kumo-shell-button {
@@ -81,6 +117,21 @@ body {
   cursor: pointer;
 }
 
+.kumo-market-theme-button span {
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1;
+}
+
+.kumo-lang-code {
+  display: inline-grid;
+  min-width: 16px;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1;
+}
+
 .kumo-shell-button:hover,
 .kumo-shell-button:focus-visible {
   background: var(--kumo-color-tint, #eef2f6);
@@ -88,9 +139,47 @@ body {
   outline: none;
 }
 
+.kumo-sidebar[data-state='collapsed'] [data-sidebar='header'],
+.kumo-sidebar[data-state='collapsed'] [data-sidebar='footer'] {
+  padding-right: 11px;
+  padding-left: 11px;
+}
+
+.kumo-sidebar[data-state='collapsed'] .kumo-brand {
+  width: 34px;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+.kumo-sidebar[data-state='collapsed'] .kumo-brand > span:not(.kumo-brand-mark) {
+  display: none;
+}
+
+.kumo-sidebar[data-state='collapsed'] .kumo-sidebar-tools {
+  width: 34px;
+  gap: 0;
+  padding: 0;
+}
+
+.kumo-sidebar[data-state='collapsed'] .kumo-shell-button {
+  display: none;
+}
+
+.kumo-sidebar [data-sidebar='trigger'] svg {
+  transition: transform var(--sidebar-animation-duration, 250ms) var(--sidebar-easing, ease);
+}
+
+.kumo-sidebar[data-state='collapsed'] [data-sidebar='trigger'] svg {
+  transform: rotate(180deg);
+}
+
 .kumo-main {
   min-width: 0;
-  flex: 1;
+  min-height: 100svh;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 .kumo-topbar {
@@ -104,8 +193,13 @@ body {
   padding: 0 24px;
 }
 
+.kumo-mobile-menu-trigger {
+  display: none;
+}
+
 .kumo-topbar-title {
   min-width: 0;
+  flex: 1;
 }
 
 .kumo-topbar-title p,
@@ -133,9 +227,28 @@ body {
 }
 
 .kumo-content {
-  width: min(100%, 1240px);
-  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  flex: 1;
+  margin: 0;
   padding: 24px;
+}
+
+@media (min-width: 768px) {
+  .kumo-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100svh;
+    max-height: 100svh;
+  }
+
+  .kumo-sidebar [data-sidebar='content-container'] {
+    height: 100svh;
+    max-height: 100svh;
+  }
 }
 
 .kumo-page-stack {
@@ -239,10 +352,74 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   padding: 18px;
+  align-items: start;
+}
+
+.kumo-form-grid > *,
+.kumo-dialog-body > *,
+.kumo-inline-controls > *,
+.kumo-page-actions > *,
+.kumo-row-actions > * {
+  min-width: 0;
+}
+
+.kumo-form-grid label,
+.kumo-dialog-body label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.kumo-form-grid input,
+.kumo-form-grid textarea,
+.kumo-dialog-body input,
+.kumo-dialog-body textarea,
+.kumo-form-grid [data-kumo-component='Select'],
+.kumo-dialog-body [data-kumo-component='Select'] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.kumo-form-grid [data-kumo-part='trigger'],
+.kumo-dialog-body [data-kumo-part='trigger'] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+.kumo-form-grid [data-kumo-part='trigger'] span,
+.kumo-dialog-body [data-kumo-part='trigger'] span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kumo-form-grid.compact {
   padding: 0;
+}
+
+.kumo-settings-llm-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.kumo-settings-provider-field {
+  grid-column: 1 / -1;
+}
+
+.kumo-settings-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px;
+}
+
+.kumo-settings-empty p {
+  margin: 0;
+  color: var(--kumo-color-subtle, #6b7280);
 }
 
 .kumo-form-grid-inline {
@@ -287,6 +464,16 @@ body {
 .kumo-table-wrap {
   width: 100%;
   overflow-x: auto;
+}
+
+.kumo-table-wrap td,
+.kumo-table-wrap th {
+  min-width: 0;
+  vertical-align: top;
+}
+
+.kumo-table-wrap td {
+  overflow-wrap: anywhere;
 }
 
 .kumo-pagination-bar {
@@ -337,8 +524,29 @@ body {
   padding: 18px 0;
 }
 
+.kumo-provider-dialog {
+  box-sizing: border-box;
+  width: min(92vw, 720px);
+  min-width: 0;
+  max-width: 720px;
+  max-height: min(86svh, 760px);
+  overflow-y: auto;
+}
+
+.kumo-provider-dialog-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.kumo-provider-dialog-grid .full-width {
+  grid-column: 1 / -1;
+}
+
 .kumo-dialog-actions {
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .kumo-screener-search {
@@ -578,11 +786,11 @@ body {
 }
 
 .market-up {
-  color: var(--kumo-color-danger, #dc2626);
+  color: var(--market-up-color, var(--kumo-color-danger, #dc2626));
 }
 
 .market-down {
-  color: var(--kumo-color-success, #16a34a);
+  color: var(--market-down-color, var(--kumo-color-success, #16a34a));
 }
 
 .kumo-backtest-intro {
@@ -1197,6 +1405,10 @@ body {
     padding: 0 14px;
   }
 
+  .kumo-mobile-menu-trigger {
+    display: inline-flex;
+  }
+
   .kumo-topbar-actions {
     display: none;
   }
@@ -1211,6 +1423,7 @@ body {
   }
 
   .kumo-form-grid,
+  .kumo-settings-llm-grid,
   .kumo-form-grid-inline,
   .kumo-screener-search,
   .kumo-filter-row,
@@ -1225,6 +1438,23 @@ body {
   .kumo-stat-grid.backtest,
   .kumo-backtest-source-grid {
     grid-template-columns: 1fr;
+  }
+
+  .kumo-settings-empty {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .kumo-provider-dialog {
+    width: min(94vw, 520px);
+  }
+
+  .kumo-provider-dialog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kumo-provider-dialog-grid .full-width {
+    grid-column: auto;
   }
 
   .kumo-pagination-bar {

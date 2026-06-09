@@ -1,5 +1,5 @@
 import { Badge, Button, Empty, LayerCard } from '@cloudflare/kumo'
-import { ArrowRight, Plus } from '@phosphor-icons/react'
+import { ArrowRight } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../lib/api'
@@ -61,7 +61,6 @@ export function DashboardPage() {
         </div>
         <Link to="/analyze" className="kumo-link-reset">
           <Button>
-            <Plus size={16} />
             {t('dashboard.quickNew')}
           </Button>
         </Link>

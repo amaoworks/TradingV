@@ -14,12 +14,12 @@ import {
   SidebarRail,
   SidebarTrigger,
   TooltipProvider,
+  useSidebar,
 } from '@cloudflare/kumo'
 import {
   CaretLeft,
-  GlobeHemisphereEast,
+  List,
   Moon,
-  Palette,
   RocketLaunch,
   Sun,
 } from '@phosphor-icons/react'
@@ -30,6 +30,7 @@ import {
   useMemo,
   useState,
   type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
   type ReactNode,
 } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
@@ -50,18 +51,31 @@ export function KumoShell() {
   const { t, locale, setLocale } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
-  const [dark, setDark] = useState(localStorage.getItem('appearance') === 'dark')
-  const [marketTheme, setMarketTheme] = useState(localStorage.getItem('themeColor') || 'red')
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('appearance')
+    if (saved === 'dark') return true
+    if (saved === 'light') return false
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+  })
+  const [marketTheme, setMarketTheme] = useState<'red' | 'green'>(() => {
+    const saved = localStorage.getItem('themeColor')
+    return saved === 'green' ? 'green' : 'red'
+  })
 
   useEffect(() => {
+    document.documentElement.dataset.theme = 'kumo'
     document.documentElement.dataset.mode = dark ? 'dark' : 'light'
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
     localStorage.setItem('appearance', dark ? 'dark' : 'light')
   }, [dark])
 
   useEffect(() => {
+    document.documentElement.dataset.marketTheme = marketTheme
     localStorage.setItem('themeColor', marketTheme)
   }, [marketTheme])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   const currentTitle = useMemo(
     () => t(titleKeyForPath(location.pathname)),
@@ -109,18 +123,30 @@ export function KumoShell() {
 
               <SidebarFooter>
                 <div className="kumo-sidebar-tools">
-                  <SidebarTrigger>
-                    <CaretLeft size={16} />
-                  </SidebarTrigger>
-                  <ShellButton onClick={() => setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN')}>
-                    <GlobeHemisphereEast size={16} />
-                    <span>{locale === 'zh-CN' ? 'EN' : '中'}</span>
+                  <ShellSidebarTrigger />
+                  <ShellButton
+                    aria-label={t('app.switchLanguage')}
+                    title={t('app.switchLanguage')}
+                    onClick={() => setLocale(locale === 'zh-CN' ? 'en-US' : 'zh-CN')}
+                  >
+                    <span className="kumo-lang-code">{locale === 'zh-CN' ? 'EN' : '中'}</span>
                   </ShellButton>
-                  <ShellButton onClick={() => setDark((value) => !value)}>
+                  <ShellButton
+                    aria-label={dark ? t('app.lightMode') : t('app.darkMode')}
+                    title={dark ? t('app.lightMode') : t('app.darkMode')}
+                    onClick={() => setDark((value) => !value)}
+                  >
                     {dark ? <Sun size={16} /> : <Moon size={16} />}
                   </ShellButton>
-                  <ShellButton onClick={() => setMarketTheme((value) => (value === 'red' ? 'green' : 'red'))}>
-                    <Palette size={16} />
+                  <ShellButton
+                    className="kumo-market-theme-button"
+                    aria-label={marketTheme === 'red' ? t('app.themeRed') : t('app.themeGreen')}
+                    title={marketTheme === 'red' ? t('app.themeRed') : t('app.themeGreen')}
+                    onClick={() => setMarketTheme((value) => (value === 'red' ? 'green' : 'red'))}
+                  >
+                    <span className={marketTheme === 'red' ? 'market-up' : 'market-down'}>
+                      {marketTheme === 'red' ? '红' : '绿'}
+                    </span>
                   </ShellButton>
                 </div>
               </SidebarFooter>
@@ -129,6 +155,13 @@ export function KumoShell() {
 
             <div className="kumo-main">
               <header className="kumo-topbar">
+                <SidebarTrigger
+                  className="kumo-mobile-menu-trigger"
+                  aria-label={t('app.expandSidebar')}
+                  title={t('app.expandSidebar')}
+                >
+                  <List size={18} />
+                </SidebarTrigger>
                 <div className="kumo-topbar-title">
                   <p>{t('app.console')}</p>
                   <h1>{currentTitle}</h1>
@@ -155,9 +188,30 @@ export function KumoShell() {
   )
 }
 
-function ShellButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+function ShellSidebarTrigger() {
+  const { open } = useSidebar()
+  const { t } = useI18n()
+  const label = open ? t('app.collapseSidebar') : t('app.expandSidebar')
+
   return (
-    <button type="button" className="kumo-shell-button" onClick={onClick}>
+    <SidebarTrigger aria-label={label} title={label}>
+      <CaretLeft size={16} />
+    </SidebarTrigger>
+  )
+}
+
+function ShellButton({
+  children,
+  className,
+  type,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
+  return (
+    <button
+      type={type ?? 'button'}
+      className={['kumo-shell-button', className].filter(Boolean).join(' ')}
+      {...props}
+    >
       {children}
     </button>
   )
