@@ -15,7 +15,13 @@ import { KLineChart } from '../components/KLineChart'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
 import { useI18n } from '../i18n/I18nProvider'
 import api from '../lib/api'
-import { errorMessage } from '../lib/format'
+import {
+  errorMessage,
+  formatCurrency,
+  formatCurrencySigned,
+  formatPctSigned,
+  marketColorClass,
+} from '../lib/format'
 
 interface PaperAccount {
   id: number
@@ -261,12 +267,12 @@ export function PaperPage() {
 
       {account ? (
         <div className="kumo-stat-grid paper">
-          <Stat label={t('paper.stats.cash')} value={account.cash.toFixed(2)} />
-          <Stat label={t('paper.stats.positionsValue')} value={positionsMarketValue.toFixed(2)} />
-          <Stat label={t('paper.stats.totalValue')} value={totalValue.toFixed(2)} positive={totalPnl >= 0} />
+          <Stat label={t('paper.stats.cash')} value={formatCurrency(account.cash)} />
+          <Stat label={t('paper.stats.positionsValue')} value={formatCurrency(positionsMarketValue)} />
+          <Stat label={t('paper.stats.totalValue')} value={formatCurrency(totalValue)} positive={totalPnl >= 0} />
           <Stat
             label={t('paper.stats.vsInitial', { n: account.initial_cash })}
-            value={`${signed(totalPnl)} (${totalPnlPct.toFixed(2)}%)`}
+            value={`${formatCurrencySigned(totalPnl)} (${formatPctSigned(totalPnlPct)})`}
             positive={totalPnl >= 0}
           />
         </div>
@@ -451,13 +457,13 @@ function PositionsTable({
           <Table.Row key={position.id}>
             <Table.Cell>{position.ticker}</Table.Cell>
             <Table.Cell>{position.name || '-'}</Table.Cell>
-            <Table.Cell>{position.shares} x {position.avg_cost.toFixed(2)}</Table.Cell>
-            <Table.Cell>{position.last_price != null ? position.last_price.toFixed(2) : '-'}</Table.Cell>
-            <Table.Cell>{position.market_value != null ? position.market_value.toFixed(2) : '-'}</Table.Cell>
+            <Table.Cell>{position.shares} x {formatCurrency(position.avg_cost)}</Table.Cell>
+            <Table.Cell>{formatCurrency(position.last_price)}</Table.Cell>
+            <Table.Cell>{formatCurrency(position.market_value)}</Table.Cell>
             <Table.Cell>
               {position.pnl_amount != null ? (
-                <span className={position.pnl_amount >= 0 ? 'market-up' : 'market-down'}>
-                  {signed(position.pnl_amount)} ({position.pnl_pct?.toFixed(2)}%)
+                <span className={marketColorClass(position.pnl_amount)}>
+                  {formatCurrencySigned(position.pnl_amount)} ({formatPctSigned(position.pnl_pct)})
                 </span>
               ) : '-'}
             </Table.Cell>
@@ -579,10 +585,6 @@ function Stat({
       </div>
     </SectionCard>
   )
-}
-
-function signed(value: number) {
-  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}`
 }
 
 function isAShareTicker(ticker: string) {

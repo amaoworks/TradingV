@@ -17,7 +17,15 @@ import { KLineChart } from '../components/KLineChart'
 import { ErrorBanner, KumoTable, LoadingEmpty, PageHeader, SectionCard } from '../components/Page'
 import { useI18n } from '../i18n/I18nProvider'
 import api from '../lib/api'
-import { errorMessage, signalBadgeVariant, todayIsoDate } from '../lib/format'
+import {
+  errorMessage,
+  formatCurrency,
+  formatCurrencySigned,
+  formatPctSigned,
+  marketColorClass,
+  signalBadgeVariant,
+  todayIsoDate,
+} from '../lib/format'
 
 interface Holding {
   id: number
@@ -298,9 +306,9 @@ export function HoldingsPage() {
       {holdings.length ? (
         <div className="kumo-stat-grid">
           <Stat label={t('holdings.stat.count')} value={holdings.length} />
-          <Stat label={t('holdings.stat.marketValue')} value={totalMarketValue.toFixed(2)} />
-          <Stat label={t('holdings.stat.cumulativePnl')} value={signed(totalPnl)} positive={totalPnl >= 0} />
-          <Stat label={t('holdings.stat.avgPnlPct')} value={`${avgPnlPct.toFixed(2)}%`} positive={avgPnlPct >= 0} />
+          <Stat label={t('holdings.stat.marketValue')} value={formatCurrency(totalMarketValue)} />
+          <Stat label={t('holdings.stat.cumulativePnl')} value={formatCurrencySigned(totalPnl)} positive={totalPnl >= 0} />
+          <Stat label={t('holdings.stat.avgPnlPct')} value={formatPctSigned(avgPnlPct)} positive={avgPnlPct >= 0} />
         </div>
       ) : null}
 
@@ -328,12 +336,12 @@ export function HoldingsPage() {
                   <Table.Row key={holding.id}>
                     <Table.Cell>{holding.ticker}</Table.Cell>
                     <Table.Cell>{holding.shares} x {holding.cost_price}</Table.Cell>
-                    <Table.Cell>{quote?.last_price != null ? quote.last_price.toFixed(2) : '-'}</Table.Cell>
-                    <Table.Cell>{quote?.market_value != null ? quote.market_value.toFixed(2) : '-'}</Table.Cell>
+                    <Table.Cell>{formatCurrency(quote?.last_price)}</Table.Cell>
+                    <Table.Cell>{formatCurrency(quote?.market_value)}</Table.Cell>
                     <Table.Cell>
                       {quote?.pnl_amount != null ? (
-                        <span className={quote.pnl_amount >= 0 ? 'market-up' : 'market-down'}>
-                          {signed(quote.pnl_amount)} ({quote.pnl_pct?.toFixed(2)}%)
+                        <span className={marketColorClass(quote.pnl_amount)}>
+                          {formatCurrencySigned(quote.pnl_amount)} ({formatPctSigned(quote.pnl_pct)})
                         </span>
                       ) : '-'}
                     </Table.Cell>
@@ -542,8 +550,4 @@ function Stat({
       </div>
     </SectionCard>
   )
-}
-
-function signed(value: number) {
-  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}`
 }
