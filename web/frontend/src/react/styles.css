@@ -330,6 +330,10 @@ body {
   text-decoration: none;
 }
 
+.kumo-list-item:last-child {
+  border-bottom: none;
+}
+
 .kumo-list-item:hover {
   background: var(--kumo-color-tint, #eef2f6);
 }
@@ -1493,4 +1497,12 @@ body {
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+/* Fix Kumo sidebar active indicator causing a white block */
+[data-sidebar="menu-button"][data-active="true"]::after,
+[data-sidebar="menu-button"][data-active="true"]::before,
+.kumo-sidebar-menu-button[data-active="true"]::after,
+.kumo-sidebar-menu-button[data-active="true"]::before {
+  display: none !important;
 }
