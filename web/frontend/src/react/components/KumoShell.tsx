@@ -11,7 +11,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
   TooltipProvider,
   useSidebar,
@@ -23,19 +22,19 @@ import {
   Moon,
   RocketLaunch,
   Sun,
+  TrendUp,
 } from '@phosphor-icons/react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   forwardRef,
   useEffect,
-  useMemo,
   useState,
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
   type ReactNode,
 } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
-import { appRoutes, titleKeyForPath } from '../lib/routes'
+import { appRoutes } from '../lib/routes'
 
 const RouterLink = forwardRef<
   HTMLAnchorElement,
@@ -78,10 +77,6 @@ export function KumoShell() {
     document.documentElement.lang = locale
   }, [locale])
 
-  const currentTitle = useMemo(
-    () => t(titleKeyForPath(location.pathname)),
-    [location.pathname, t],
-  )
 
   return (
     <TooltipProvider>
@@ -105,12 +100,16 @@ export function KumoShell() {
                   <SidebarMenu>
                     {appRoutes.map((route) => {
                       const Icon = route.icon
+                      const isActive =
+                        location.pathname === route.path ||
+                        (route.path === '/history' && location.pathname.startsWith('/report/')) ||
+                        (route.path === '/analyze' && location.pathname.startsWith('/progress/'))
                       return (
                         <SidebarMenuItem key={route.key}>
                           <SidebarMenuButton
                             href={route.path}
-                            active={location.pathname === route.path}
-                            icon={<Icon size={18} />}
+                            active={isActive}
+                            icon={Icon}
                             tooltip={t(route.titleKey)}
                           >
                             {t(route.titleKey)}
@@ -145,13 +144,12 @@ export function KumoShell() {
                     title={marketTheme === 'red' ? t('app.themeRed') : t('app.themeGreen')}
                     onClick={() => setMarketTheme((value) => (value === 'red' ? 'green' : 'red'))}
                   >
-                    <span className={marketTheme === 'red' ? 'market-up' : 'market-down'}>
-                      {marketTheme === 'red' ? '红' : '绿'}
+                    <span className="market-up" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <TrendUp size={16} weight="bold" />
                     </span>
                   </ShellButton>
                 </div>
               </SidebarFooter>
-              <SidebarRail />
             </Sidebar>
 
             <div className="kumo-main">
@@ -164,8 +162,7 @@ export function KumoShell() {
                   <List size={18} />
                 </SidebarTrigger>
                 <div className="kumo-topbar-title">
-                  <p>{t('app.console')}</p>
-                  <h1>{currentTitle}</h1>
+                  <h1 className="kumo-console-title">{t('app.console')}</h1>
                 </div>
                 <div className="kumo-topbar-actions">
                   <Button variant="secondary" icon={MagnifyingGlass} onClick={() => navigate('/screener')}>
@@ -194,7 +191,7 @@ function ShellSidebarTrigger() {
   const label = open ? t('app.collapseSidebar') : t('app.expandSidebar')
 
   return (
-    <SidebarTrigger aria-label={label} title={label}>
+    <SidebarTrigger className="kumo-shell-button" aria-label={label} title={label}>
       <CaretLeft size={16} />
     </SidebarTrigger>
   )

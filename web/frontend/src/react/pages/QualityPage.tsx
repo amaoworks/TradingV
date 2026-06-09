@@ -196,7 +196,6 @@ export function QualityPage() {
   return (
     <div className="kumo-page-stack">
       <PageHeader
-        eyebrow="Quality"
         title={t('quality.title')}
         subtitle={t('quality.subtitle')}
         actions={

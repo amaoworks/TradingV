@@ -162,7 +162,7 @@ body {
   padding: 0;
 }
 
-.kumo-sidebar[data-state='collapsed'] .kumo-shell-button {
+.kumo-sidebar[data-state='collapsed'] .kumo-shell-button:not([data-sidebar='trigger']) {
   display: none;
 }
 
@@ -218,6 +218,15 @@ body {
   color: var(--kumo-color-default, #111827);
   font-size: 18px;
   line-height: 1.2;
+}
+
+.kumo-topbar-title h1.kumo-console-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--kumo-color-default, #111827);
 }
 
 .kumo-topbar-actions {
@@ -516,6 +525,20 @@ body {
 
 .kumo-definition-list.report-summary {
   grid-template-columns: minmax(120px, 170px) minmax(0, 1fr) minmax(120px, 170px) minmax(0, 1fr);
+}
+
+[role="dialog"],
+[role="alertdialog"] {
+  padding: 24px;
+}
+
+[role="dialog"] h2,
+[role="alertdialog"] h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-color-kumo-strong, #111827);
 }
 
 .kumo-dialog-body {

@@ -1,9 +1,10 @@
-import { Badge, Button, Empty, LayerCard } from '@cloudflare/kumo'
+import { Badge, Button, Empty } from '@cloudflare/kumo'
 import { ArrowRight, Plus } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../lib/api'
 import { useI18n } from '../i18n/I18nProvider'
+import { PageHeader, SectionCard } from '../components/Page'
 
 interface AnalysisItem {
   id: string
@@ -53,35 +54,30 @@ export function DashboardPage() {
 
   return (
     <div className="kumo-page-stack">
-      <header className="kumo-page-header">
-        <div>
-          <p className="kumo-eyebrow">{t('app.console')}</p>
-          <h1>{t('dashboard.title')}</h1>
-          <p>{t('dashboard.subtitle')}</p>
-        </div>
-        <Link to="/analyze" className="kumo-link-reset">
-          <Button icon={Plus}>
-            {t('dashboard.quickNew')}
-          </Button>
-        </Link>
-      </header>
+      <PageHeader
+        title={t('dashboard.title')}
+        subtitle={t('dashboard.subtitle')}
+        actions={
+          <Link to="/analyze" className="kumo-link-reset">
+            <Button icon={Plus}>
+              {t('dashboard.quickNew')}
+            </Button>
+          </Link>
+        }
+      />
 
-      <LayerCard className="kumo-card">
-        <div className="kumo-card-header">
-          <h2>{t('dashboard.sysStatus')}</h2>
-        </div>
+      <SectionCard title={t('dashboard.sysStatus')}>
         <div className="kumo-status-row">
           <Badge variant="success">{t('dashboard.apiConnected')}</Badge>
           {loading ? <Badge>{t('common.saving')}</Badge> : null}
           {error ? <Badge variant="destructive">{error}</Badge> : null}
         </div>
-      </LayerCard>
+      </SectionCard>
 
-      <LayerCard className="kumo-card">
-        <div className="kumo-card-header">
-          <h2>{t('dashboard.recent')}</h2>
-          <Badge>{Object.keys(signalDistribution).length || 'N/A'}</Badge>
-        </div>
+      <SectionCard
+        title={t('dashboard.recent')}
+        extra={<Badge>{Object.keys(signalDistribution).length || 'N/A'}</Badge>}
+      >
         {recent.length ? (
           <div className="kumo-list">
             {recent.map((item) => (
@@ -100,7 +96,7 @@ export function DashboardPage() {
         ) : (
           <Empty title={t('dashboard.noRecent')} description={loading ? t('common.saving') : undefined} />
         )}
-      </LayerCard>
+      </SectionCard>
     </div>
   )
 }

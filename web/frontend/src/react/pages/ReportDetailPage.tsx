@@ -176,7 +176,6 @@ export function ReportDetailPage() {
   return (
     <div className="kumo-page-stack">
       <PageHeader
-        eyebrow="Report"
         title={t('report.titlePrefix', { ticker: analysis?.ticker || '' })}
         subtitle={analysis?.trade_date || id}
         actions={

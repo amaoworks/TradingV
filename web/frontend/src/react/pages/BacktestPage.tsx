@@ -237,7 +237,6 @@ export function BacktestPage() {
   return (
     <div className="kumo-page-stack">
       <PageHeader
-        eyebrow="Backtest"
         title={t('backtest.title')}
         subtitle={t('backtest.subtitle')}
         actions={
